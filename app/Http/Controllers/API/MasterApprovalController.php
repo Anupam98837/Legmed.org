@@ -1,0 +1,1079 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
+
+class MasterApprovalController extends Controller
+{
+    use \App\Http\Controllers\API\Concerns\DepartmentScopeable;
+
+    /* ============================================
+     | Helpers
+     |============================================ */
+
+    private function actor(Request $r): array
+    {
+        return [
+            'id'    => (int) ($r->attributes->get('auth_tokenable_id') ?? optional($r->user())->id ?? 0),
+            'role'  => strtolower((string) ($r->attributes->get('auth_role') ?? ($r->user()->role ?? ''))),
+            'type'  => (string) ($r->attributes->get('auth_tokenable_type') ?? ($r->user() ? get_class($r->user()) : '')),
+            'uuid'  => (string) ($r->attributes->get('auth_user_uuid') ?? ($r->user()->uuid ?? '')),
+            'is_hod' => strtolower((string) ($r->attributes->get('auth_role') ?? ($r->user()->role ?? ''))) === 'hod',
+            'is_upper_role' => in_array(strtolower((string) ($r->attributes->get('auth_role') ?? ($r->user()->role ?? ''))), ['admin', 'principal', 'director']),
+        ];
+    }
+
+    /**
+     * ✅ Activity log writer (silent fail; never breaks API)
+     */
+    private function logActivity(
+        Request $r,
+        string $activity,
+        string $module,
+        string $tableName,
+        $recordId = null,
+        ?array $changedFields = null,
+        ?array $oldValues = null,
+        ?array $newValues = null,
+        ?string $note = null
+    ): void {
+        try {
+            $a = $this->actor($r);
+
+            DB::table('user_data_activity_log')->insert([
+                'performed_by'      => (int)($a['id'] ?? 0),
+                'performed_by_role' => ($a['role'] ?? null) ?: null,
+                'ip'                => $r->ip(),
+                'user_agent'        => substr((string)($r->userAgent() ?? ''), 0, 512),
+
+                'activity'   => substr($activity, 0, 50),
+                'module'     => substr($module, 0, 100),
+
+                'table_name' => substr($tableName ?: 'unknown', 0, 128),
+                'record_id'  => is_null($recordId) ? null : (int)$recordId,
+
+                'changed_fields' => is_null($changedFields) ? null : json_encode(array_values($changedFields)),
+                'old_values'     => is_null($oldValues) ? null : json_encode($oldValues),
+                'new_values'     => is_null($newValues) ? null : json_encode($newValues),
+
+                'log_note'   => $note,
+
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+        } catch (\Throwable $e) {
+            // Never break main flow due to logging failure.
+        }
+    }
+
+    private function pickFieldsFromRow($row, array $fields): array
+    {
+        if (!$row) return [];
+        $arr = (array) $row;
+
+        $out = [];
+        foreach ($fields as $f) {
+            if (array_key_exists($f, $arr)) {
+                $out[$f] = $arr[$f];
+            }
+        }
+        return $out;
+    }
+
+    protected function toUrl(?string $path): ?string
+    {
+        $path = trim((string) $path);
+        if ($path === '') return null;
+        if (preg_match('~^https?://~i', $path)) return $path;
+        return url('/' . ltrim($path, '/'));
+    }
+
+    /**
+     * ✅ Config for all divisions
+     * Each module is normalized to same response shape.
+     */
+    protected function modules(): array
+    {
+        return [
+            'announcements' => [
+                'label' => 'Announcements',
+                'table' => 'announcements',
+                'alias' => 'a',
+                'has_department' => true,
+                'title_col' => 'title',
+                'slug_col'  => 'slug',
+                'body_col'  => 'body',
+                'image_col' => 'cover_image',
+                'attachments_col' => 'attachments_json',
+            ],
+            'achievements' => [
+                'label' => 'Achievements',
+                'table' => 'achievements',
+                'alias' => 'ac',
+                'has_department' => true,
+                'title_col' => 'title',
+                'slug_col'  => 'slug',
+                'body_col'  => 'body',
+                'image_col' => 'cover_image',
+                'attachments_col' => 'attachments_json',
+            ],
+            'notices' => [
+                'label' => 'Notices',
+                'table' => 'notices',
+                'alias' => 'n',
+                'has_department' => true,
+                'title_col' => 'title',
+                'slug_col'  => 'slug',
+                'body_col'  => 'body',
+                'image_col' => 'cover_image',
+                'attachments_col' => 'attachments_json',
+            ],
+            'student_activities' => [
+                'label' => 'Student Activities',
+                'table' => 'student_activities',
+                'alias' => 'sa',
+                'has_department' => true,
+                'title_col' => 'title',
+                'slug_col'  => 'slug',
+                'body_col'  => 'body',
+                'image_col' => 'cover_image',
+                'attachments_col' => 'attachments_json',
+            ],
+            'career_notices' => [
+                'label' => 'Career Notices',
+                'table' => 'career_notices',
+                'alias' => 'cn',
+                'has_department' => false,
+                'title_col' => 'title',
+                'slug_col'  => 'slug',
+                'body_col'  => 'body',
+                'image_col' => 'cover_image',
+                'attachments_col' => 'attachments_json',
+            ],
+            'why_us' => [
+                'label' => 'Why Us',
+                'table' => 'why_us',
+                'alias' => 'wu',
+                'has_department' => false,
+                'title_col' => 'title',
+                'slug_col'  => 'slug',
+                'body_col'  => 'body',
+                'image_col' => 'cover_image',
+                'attachments_col' => 'attachments_json',
+            ],
+            'scholarships' => [
+                'label' => 'Scholarships',
+                'table' => 'scholarships',
+                'alias' => 's',
+                'has_department' => true,
+                'title_col' => 'title',
+                'slug_col'  => 'slug',
+                'body_col'  => 'body',
+                'image_col' => 'cover_image',
+                'attachments_col' => 'attachments_json',
+            ],
+            'placement_notices' => [
+                'label' => 'Placement Notices',
+                'table' => 'placement_notices',
+                'alias' => 'pn',
+                'has_department' => false, // (department_ids is JSON)
+                'title_col' => 'title',
+                'slug_col'  => 'slug',
+                'body_col'  => 'description',
+                'image_col' => 'banner_image_url',
+                'attachments_col' => null,
+            ],
+            'pages' => [
+                'label'           => 'Pages',
+                'table'           => 'pages',
+                'alias'           => 'pg',
+                'has_department'  => true,
+                'title_col'       => 'title',
+                'slug_col'        => 'slug',
+                'body_col'        => 'content_html',
+                'image_col'       => null,
+                'attachments_col' => null,
+                'created_by_col'  => 'created_by_user_id',
+            ],
+            'gallery' => [
+                'label'           => 'Gallery',
+                'table'           => 'gallery',
+                'alias'           => 'g',
+                'has_department'  => true,
+                'title_col'       => 'title',
+                'slug_col'        => 'slug',
+                'body_col'        => 'description',
+                'image_col'       => 'image',
+                'attachments_col' => null,
+            ],
+            'events' => [
+                'label'           => 'Events',
+                'table'           => 'events',
+                'alias'           => 'e',
+                'has_department'  => true,
+                'title_col'       => 'title',
+                'slug_col'        => 'slug',
+                'body_col'        => 'description',
+                'image_col'       => 'cover_image_url',
+                'attachments_col' => null,
+            ],
+        ];
+    }
+
+    /**
+     * Base query builder per module (with joins for creator + department)
+     */
+    protected function moduleQuery(string $key, Request $request, bool $includeDeleted = false)
+    {
+        $mods = $this->modules();
+        if (!isset($mods[$key])) return null;
+
+        $cfg = $mods[$key];
+        $t   = $cfg['table'];
+        $a   = $cfg['alias'];
+
+        // Get department scope for current user
+        $__ac = $this->departmentAccessControl($request);
+
+        // If the user's role is not "active" or invalid, return null
+        if ($__ac['mode'] === 'none') return null;
+
+        $q = DB::table($t . " as {$a}")
+            ->leftJoin('users as u', 'u.id', '=', "{$a}." . ($cfg['created_by_col'] ?? 'created_by'));
+
+        if ($cfg['has_department']) {
+            $q->leftJoin('departments as d', 'd.id', '=', "{$a}.department_id");
+            // Scope module to this specific department if user is restricted
+            $this->applyDeptScope($q, $__ac, "{$a}.department_id");
+        } else {
+            // Important: If a user is restricted to a department, they shouldn't see
+            // global (non-departmental) module requests like why_us or career_notices
+            if ($__ac['mode'] === 'department') {
+                $q->whereRaw('1=0');
+            }
+        }
+
+        // Soft delete respect
+        if (!$includeDeleted) {
+            $q->whereNull("{$a}.deleted_at");
+        }
+
+        // optional search: ?q=
+        if ($request->filled('q')) {
+            $term = '%' . trim((string) $request->query('q')) . '%';
+
+            $titleCol = $cfg['title_col'];
+            $slugCol  = $cfg['slug_col'];
+            $bodyCol  = $cfg['body_col'];
+
+            $q->where(function ($sub) use ($a, $term, $titleCol, $slugCol, $bodyCol) {
+                $sub->where("{$a}.{$titleCol}", 'like', $term)
+                    ->orWhere("{$a}.{$slugCol}", 'like', $term);
+
+                if (!empty($bodyCol)) {
+                    $sub->orWhere("{$a}.{$bodyCol}", 'like', $term);
+                }
+            });
+        }
+
+        // select everything + standardized meta
+        $select = [
+            "{$a}.*",
+            DB::raw("'" . addslashes($key) . "' as division_key"),
+            DB::raw("'" . addslashes($cfg['label']) . "' as division_label"),
+
+            // creator
+            "u.id as creator_id",
+            "u.uuid as creator_uuid",
+            "u.name as creator_name",
+            "u.email as creator_email",
+        ];
+
+        if ($cfg['has_department']) {
+            $select[] = "d.title as department_title";
+            $select[] = "d.slug as department_slug";
+            $select[] = "d.uuid as department_uuid";
+        } else {
+            $select[] = DB::raw("NULL as department_title");
+            $select[] = DB::raw("NULL as department_slug");
+            $select[] = DB::raw("NULL as department_uuid");
+        }
+
+        $q->select($select);
+
+        // default sort
+        $q->orderBy("{$a}.created_at", 'desc');
+
+        return $q;
+    }
+
+    /**
+     * Normalizes each row with:
+     * - creator object
+     * - department object (if exists)
+     * - decoded attachments_json + metadata
+     * - cover/banner URL normalization
+     * - record contains full row
+     */
+    protected function normalizeRow(array $cfg, $row): array
+    {
+        $arr = (array) $row;
+
+        // decode attachments_json
+        $attCol = $cfg['attachments_col'] ?? null;
+        if ($attCol && isset($arr[$attCol]) && is_string($arr[$attCol])) {
+            $decoded = json_decode($arr[$attCol], true);
+            $arr[$attCol] = (json_last_error() === JSON_ERROR_NONE) ? $decoded : null;
+        }
+
+        // decode metadata
+        if (isset($arr['metadata']) && is_string($arr['metadata'])) {
+            $decoded = json_decode($arr['metadata'], true);
+            $arr['metadata'] = (json_last_error() === JSON_ERROR_NONE) ? $decoded : null;
+        }
+
+        // media url (cover_image or banner_image_url)
+        $imgCol = $cfg['image_col'] ?? null;
+        $mediaUrl = null;
+
+        if ($imgCol && isset($arr[$imgCol])) {
+            $mediaUrl = $this->toUrl($arr[$imgCol]);
+        }
+
+        // unified creator
+        $creator = [
+            'id'    => isset($arr['creator_id']) ? (int) $arr['creator_id'] : null,
+            'uuid'  => $arr['creator_uuid'] ?? null,
+            'name'  => $arr['creator_name'] ?? null,
+            'email' => $arr['creator_email'] ?? null,
+        ];
+
+        // unified department (if any)
+        $department = null;
+        if (!empty($arr['department_uuid']) || !empty($arr['department_title']) || !empty($arr['department_slug'])) {
+            $department = [
+                'id'    => isset($arr['department_id']) ? (int) $arr['department_id'] : null,
+                'uuid'  => $arr['department_uuid'] ?? null,
+                'title' => $arr['department_title'] ?? null,
+                'slug'  => $arr['department_slug'] ?? null,
+            ];
+        }
+
+        // standardized output
+        return [
+            'division' => [
+                'key'   => $arr['division_key'] ?? null,
+                'label' => $arr['division_label'] ?? null,
+            ],
+
+            'id'   => isset($arr['id']) ? (int) $arr['id'] : null,
+            'uuid' => $arr['uuid'] ?? null,
+
+            'title' => $arr[$cfg['title_col']] ?? null,
+            'slug'  => $arr[$cfg['slug_col']] ?? null,
+
+            'status'               => $arr['status'] ?? null,
+            'workflow_status'      => $arr['workflow_status'] ?? null,
+            'draft_data'           => isset($arr['draft_data']) ? (is_string($arr['draft_data']) ? json_decode($arr['draft_data'], true) : $arr['draft_data']) : null,
+            'is_featured_home'     => isset($arr['is_featured_home']) ? (int) $arr['is_featured_home'] : null,
+            'request_for_approval' => in_array(($arr['workflow_status'] ?? ''), ['pending_check', 'checked']) ? 1 : 0,
+            'is_approved'          => ($arr['workflow_status'] ?? '') === 'approved' ? 1 : 0,
+            'is_rejected'          => ($arr['workflow_status'] ?? '') === 'rejected' ? 1 : 0,
+            'rejected_reason'      => $arr['rejected_reason'] ?? $arr['rejection_reason'] ?? null,
+
+            'created_at'    => $arr['created_at'] ?? null,
+            'updated_at'    => $arr['updated_at'] ?? null,
+            'created_at_ip' => $arr['created_at_ip'] ?? null,
+            'updated_at_ip' => $arr['updated_at_ip'] ?? null,
+
+            'publish_at' => $arr['publish_at'] ?? null,
+            'expire_at'  => $arr['expire_at'] ?? null,
+
+            'creator'    => $creator,
+            'department' => $department,
+
+            'media' => [
+                'path'   => $imgCol ? ($arr[$imgCol] ?? null) : null,
+                'url'    => $mediaUrl,
+                'column' => $imgCol,
+            ],
+
+            // ✅ full row includes ALL details from table
+            'record' => $arr,
+        ];
+    }
+
+    /**
+     * Fetch rows for a given tab
+     * - pending: request_for_approval=1 AND is_approved=0
+     * - approved: is_approved=1
+     * - requests: request_for_approval=1 (all)
+     */
+    protected function fetchTab(string $tab, Request $request): array
+    {
+        static $rejectionCache = []; // memory cache for repeated describes
+
+        $includeDeleted = filter_var($request->query('with_trashed', false), FILTER_VALIDATE_BOOLEAN);
+        $perDivision    = max(1, min(500, (int) $request->query('per_division', 200)));
+
+        $mods = $this->modules();
+        $out  = [];
+
+        foreach ($mods as $key => $cfg) {
+            $q = $this->moduleQuery($key, $request, $includeDeleted);
+            if (!$q) continue;
+
+            $a = $cfg['alias'];
+            $t = $cfg['table'];
+
+            if (!isset($rejectionCache[$t])) {
+                $rejectionCache[$t] = Schema::hasColumn($t, 'is_rejected');
+            }
+            $hasRejection = $rejectionCache[$t];
+
+            $actor = $this->actor($request);
+
+            if ($tab === 'pending') {
+                $q->where(function($sub) use ($a, $actor) {
+                    if ($actor['is_upper_role']) {
+                        // Admin/Principal can see both pending_check and checked
+                        $sub->whereIn("{$a}.workflow_status", ['pending_check', 'checked']);
+                    } elseif ($actor['is_hod']) {
+                        // HOD only sees pending_check
+                        $sub->where("{$a}.workflow_status", 'pending_check');
+                    } else {
+                        // Others (Faculty/Author) see their own pending items if applicable
+                        $sub->whereIn("{$a}.workflow_status", ['pending_check', 'checked']);
+                    }
+                });
+            } elseif ($tab === 'approved') {
+                $q->where("{$a}.workflow_status", 'approved');
+            } elseif ($tab === 'rejected') {
+                $q->where("{$a}.workflow_status", 'rejected');
+            } else { // requests
+                $q->whereIn("{$a}.workflow_status", ['pending_check', 'checked', 'rejected']);
+            }
+
+            $rows = $q->limit($perDivision)->get();
+
+            foreach ($rows as $r) {
+                $out[] = $this->normalizeRow($cfg, $r);
+            }
+        }
+
+        // Global sort by created_at desc
+        usort($out, function ($x, $y) {
+            $cx = (string)($x['created_at'] ?? '');
+            $cy = (string)($y['created_at'] ?? '');
+            $tx = $cx !== '' ? strtotime($cx) : 0;
+            $ty = $cy !== '' ? strtotime($cy) : 0;
+            return $ty <=> $tx;
+        });
+
+        return array_values($out);
+    }
+
+    /**
+     * Notifications/Divisions counts + latest pending list
+     */
+    protected function buildNotifications(Request $request): array
+    {
+        $includeDeleted = filter_var($request->query('with_trashed', false), FILTER_VALIDATE_BOOLEAN);
+        $latestLimit    = max(1, min(50, (int) $request->query('latest_limit', 5)));
+
+        $mods = $this->modules();
+
+        $divisions = [];
+        $totals = [
+            'pending'  => 0,
+            'approved' => 0,
+            'requests' => 0,
+        ];
+
+        foreach ($mods as $key => $cfg) {
+            $t = $cfg['table'];
+            $a = $cfg['alias'];
+
+            $base = DB::table($t . " as {$a}");
+
+            if (!$includeDeleted) {
+                $base->whereNull("{$a}.deleted_at");
+            }
+
+            $actor = $this->actor($request);
+
+            $pendingCount = (clone $base)
+                ->where(function($sub) use ($a, $actor) {
+                    if ($actor['is_upper_role']) {
+                        $sub->whereIn("{$a}.workflow_status", ['pending_check', 'checked']);
+                    } elseif ($actor['is_hod']) {
+                        $sub->where("{$a}.workflow_status", 'pending_check');
+                    } else {
+                        $sub->whereIn("{$a}.workflow_status", ['pending_check', 'checked']);
+                    }
+                })->count();
+
+            $approvedCount = (clone $base)
+                ->where("{$a}.workflow_status", 'approved')
+                ->count();
+
+            $requestsCount = (clone $base)
+                ->whereIn("{$a}.workflow_status", ['pending_check', 'checked', 'rejected'])
+                ->count();
+
+            // latest pending rows
+            $latestPending = [];
+            $actor = $this->actor($request);
+            $q = $this->moduleQuery($key, $request, $includeDeleted);
+            if ($q) {
+                $q->where(function($sub) use ($a, $actor) {
+                    if ($actor['is_upper_role']) {
+                        $sub->whereIn("{$a}.workflow_status", ['pending_check', 'checked']);
+                    } elseif ($actor['is_hod']) {
+                        $sub->where("{$a}.workflow_status", 'pending_check');
+                    } else {
+                        $sub->whereIn("{$a}.workflow_status", ['pending_check', 'checked']);
+                    }
+                })->limit($latestLimit);
+
+                $rows = $q->get();
+                foreach ($rows as $r) {
+                    $latestPending[] = $this->normalizeRow($cfg, $r);
+                }
+            }
+
+            $divisions[$key] = [
+                'key'   => $key,
+                'label' => $cfg['label'],
+                'counts' => [
+                    'pending'  => (int) $pendingCount,
+                    'approved' => (int) $approvedCount,
+                    'requests' => (int) $requestsCount,
+                ],
+                'latest_pending' => $latestPending,
+            ];
+
+            $totals['pending']  += (int) $pendingCount;
+            $totals['approved'] += (int) $approvedCount;
+            $totals['requests'] += (int) $requestsCount;
+        }
+
+        return [
+            'totals'    => $totals,
+            'divisions' => $divisions,
+        ];
+    }
+
+    /* ============================================
+     | ✅ NEW API: FINAL (Approved only)
+     |============================================ */
+
+    /**
+     * ✅ GET: /api/master-approval/final
+     * Returns ONLY approved data from:
+     * announcements, achievements, notices, student_activities,
+     * career_notices, why_us, scholarships, placement_notices
+     */
+    public function final(Request $request)
+    {
+        $actor = $this->actor($request);
+
+        // ✅ Only approved items across all divisions
+        $approved = $this->fetchTab('approved', $request);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Master approval final (approved only)',
+            'actor'   => $actor,
+            'approved' => [
+                'count' => count($approved),
+                'items' => $approved,
+            ],
+        ]);
+    }
+
+    /* ============================================
+     | EXISTING API (unchanged)
+     |============================================ */
+
+    /**
+     * ✅ ONE API for Master Approval Page:
+     * - requests: request_for_approval=1
+     * - tabs.pending: request_for_approval=1 AND is_approved=0
+     * - tabs.approved: is_approved=1
+     * - notifications: division-wise counts + latest pending list
+     */
+    public function overview(Request $request)
+    {
+        $actor = $this->actor($request);
+
+        $pending  = $this->fetchTab('pending', $request);
+        $approved = $this->fetchTab('approved', $request);
+        $rejected = $this->fetchTab('rejected', $request);
+        $requests = $this->fetchTab('requests', $request);
+        $notifications = $this->buildNotifications($request);
+        return response()->json([
+            'success' => true,
+            'message' => 'Master approval overview',
+            'actor'   => $actor,
+            'tabs' => [
+                'not_approved' => [
+                    'label' => 'Not Approved (Pending Requests)',
+                    'count' => count($pending),
+                    'items' => $pending,
+                ],
+                'approved' => [
+                    'label' => 'Approved',
+                    'count' => count($approved),
+                    'items' => $approved,
+                ],
+                'rejected' => [
+                    'label' => 'Rejected',
+                    'count' => count($rejected),
+                    'items' => $rejected,
+                ],
+            ],
+
+            // ✅ all requests_for_approval=1 (your "all requests list")
+            'requests' => [
+                'count' => count($requests),
+                'items' => $requests,
+            ],
+
+            // ✅ division-wise notifications (counts + latest pending)
+            'notifications' => $notifications,
+        ]);
+    }
+
+    /* ============================================================
+     | Helper: Find which module table contains the UUID
+     |============================================================ */
+    private function moduleTableMap(): array
+    {
+        return [
+            'announcements'      => 'announcements',
+            'achievements'       => 'achievements',
+            'notices'            => 'notices',
+            'student_activities' => 'student_activities',
+            'career_notices'     => 'career_notices',
+            'why_us'             => 'why_us',
+            'scholarships'       => 'scholarships',
+            'placement_notices'  => 'placement_notices',
+            'pages'              => 'pages',
+            'gallery'            => 'gallery',
+            'events'             => 'events',
+        ];
+    }
+
+    private function resolveTargetByUuid(string $uuid, ?string $hintDivisionKey = null): ?array
+    {
+        $map = $this->moduleTableMap();
+
+        // ✅ If frontend ever sends division_key as hint, try it first (faster)
+        if ($hintDivisionKey && isset($map[$hintDivisionKey])) {
+            $table = $map[$hintDivisionKey];
+            if (Schema::hasTable($table)) {
+                $row = DB::table($table)->where('uuid', $uuid)->first();
+                if ($row) {
+                    return ['division_key' => $hintDivisionKey, 'table' => $table, 'row' => $row];
+                }
+            }
+        }
+
+        // ✅ Otherwise scan all known module tables
+        foreach ($map as $divisionKey => $table) {
+            if (!Schema::hasTable($table)) continue;
+
+            $row = DB::table($table)->where('uuid', $uuid)->first();
+            if ($row) {
+                return ['division_key' => $divisionKey, 'table' => $table, 'row' => $row];
+            }
+        }
+
+        return null;
+    }
+
+    private function buildSafeUpdatePayload(string $table, array $updates, Request $request): array
+    {
+        $final = [];
+
+        foreach ($updates as $col => $val) {
+            if (Schema::hasColumn($table, $col)) {
+                $final[$col] = $val;
+            }
+        }
+
+        // ✅ Common audit fields (only if exist)
+        if (Schema::hasColumn($table, 'updated_at')) {
+            $final['updated_at'] = Carbon::now();
+        }
+        if (Schema::hasColumn($table, 'updated_at_ip')) {
+            $final['updated_at_ip'] = $request->ip();
+        }
+
+        return $final;
+    }
+
+    /* ============================================================
+     | ✅ POST: /api/master-approval/{uuid}/approve
+     |============================================================ */
+    public function approve(Request $request, string $uuid)
+    {
+        $uuid = trim($uuid);
+        $hint = $request->input('division_key'); // optional
+
+        try {
+            $target = $this->resolveTargetByUuid($uuid, $hint);
+
+            if (!$target) {
+                // ✅ Log: approve attempt but record not found
+                $this->logActivity(
+                    $request,
+                    'approve',
+                    'master_approval',
+                    'unknown',
+                    null,
+                    null,
+                    null,
+                    null,
+                    "Approve failed: record not found. uuid={$uuid}, hint_division_key=" . ($hint ?: '')
+                );
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Record not found for approval.',
+                    'uuid'    => $uuid,
+                ], 404);
+            }
+
+            $table  = $target['table'];
+            $before = $target['row'];
+
+            DB::beginTransaction();
+
+            $actor = $this->actor($request);
+            $isFinalApproval = $actor['is_upper_role'];
+
+            // ✅ Approve logic
+            $approvePayload = [
+                'workflow_status'      => $isFinalApproval ? 'approved' : 'checked',
+                'is_approved'          => $isFinalApproval ? 1 : 0,
+                'request_for_approval' => $isFinalApproval ? 0 : 1, // still in the pipeline
+                'is_rejected'          => 0,
+                'approved_at'          => Carbon::now(),
+                'approved_by'          => (int)($actor['id'] ?? 0),
+            ];
+
+            // For pages: also flip status to Active so it goes live only on final approval
+            if ($isFinalApproval && $table === 'pages') {
+                $approvePayload['status'] = 'Active';
+            }
+
+            // ✅ Merge draft_data ONLY on final approval
+            if ($isFinalApproval && !empty($before->draft_data)) {
+                $draft = is_string($before->draft_data) ? json_decode($before->draft_data, true) : $before->draft_data;
+                if ($draft && is_array($draft)) {
+                    foreach ($draft as $k => $v) {
+                        if (Schema::hasColumn($table, $k)) {
+                            $approvePayload[$k] = $v;
+                        }
+                    }
+                }
+                $approvePayload['draft_data'] = null;
+            }
+
+            $payload = $this->buildSafeUpdatePayload($table, $approvePayload, $request);
+
+            if (empty($payload)) {
+                DB::rollBack();
+
+                // ✅ Log: no updatable columns
+                $this->logActivity(
+                    $request,
+                    'approve',
+                    'master_approval',
+                    $table,
+                    isset($before->id) ? (int)$before->id : null,
+                    [],
+                    [],
+                    [],
+                    "Approve blocked: no updatable approval columns. uuid={$uuid}, division_key={$target['division_key']}"
+                );
+
+                return response()->json([
+                    'success' => false,
+                    'message' => "No updatable approval columns found on table: {$table}",
+                ], 422);
+            }
+
+            DB::table($table)->where('uuid', $uuid)->update($payload);
+
+            // ✅ Log to content_approval_logs
+            DB::table('content_approval_logs')->insert([
+                'model_type'  => $table,
+                'model_id'    => (int) $before->id,
+                'user_id'     => (int) ($actor['id'] ?? 0),
+                'action'      => $isFinalApproval ? 'approved' : 'checked',
+                'from_status' => (string) ($before->workflow_status ?? ''),
+                'to_status'   => $isFinalApproval ? 'approved' : 'checked',
+                'comment'     => $isFinalApproval ? 'Final Approval' : 'Checked by HOD',
+                'created_at'  => Carbon::now(),
+                'updated_at'  => Carbon::now(),
+            ]);
+
+            $updated = DB::table($table)->where('uuid', $uuid)->first();
+
+            DB::commit();
+
+            // ✅ Log AFTER commit (so it always persists on success)
+            $changedFields = array_keys($payload);
+            $oldValues = $this->pickFieldsFromRow($before, $changedFields);
+            $newValues = $this->pickFieldsFromRow($updated, $changedFields);
+
+            $recordId = null;
+            if ($updated && isset($updated->id)) $recordId = (int)$updated->id;
+            elseif ($before && isset($before->id)) $recordId = (int)$before->id;
+
+            $this->logActivity(
+                $request,
+                'approve',
+                'master_approval',
+                $table,
+                $recordId,
+                $changedFields,
+                $oldValues,
+                $newValues,
+                "Approved successfully. uuid={$uuid}, division_key={$target['division_key']}"
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Approved successfully.',
+                'division_key' => $target['division_key'],
+                'table' => $table,
+                'item' => $updated,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            // ✅ Log error (outside transaction)
+            $this->logActivity(
+                $request,
+                'approve',
+                'master_approval',
+                $target['table'] ?? 'unknown',
+                isset($target['row']->id) ? (int)$target['row']->id : null,
+                null,
+                null,
+                null,
+                "Approve failed (exception): {$e->getMessage()}. uuid={$uuid}, hint_division_key=" . ($hint ?: '')
+            );
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Approve failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /* ============================================================
+     | ✅ POST: /api/master-approval/{uuid}/reject
+     |============================================================ */
+    public function reject(Request $request, string $uuid)
+    {
+        $uuid   = trim($uuid);
+        $reason = trim((string)$request->input('reason', ''));
+        $hint   = $request->input('division_key'); // optional
+
+        try {
+            $target = $this->resolveTargetByUuid($uuid, $hint);
+
+            if (!$target) {
+                // ✅ Log: reject attempt but record not found
+                $this->logActivity(
+                    $request,
+                    'reject',
+                    'master_approval',
+                    'unknown',
+                    null,
+                    null,
+                    null,
+                    null,
+                    "Reject failed: record not found. uuid={$uuid}, hint_division_key=" . ($hint ?: '') . ", reason=" . ($reason ?: '')
+                );
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Record not found for rejection.',
+                    'uuid'    => $uuid,
+                ], 404);
+            }
+
+            $table  = $target['table'];
+            $before = $target['row'];
+
+            DB::beginTransaction();
+
+            // ✅ Reject logic
+            $rejectPayload = [
+                'workflow_status'      => 'rejected',
+                'is_approved'          => 0,
+                'is_rejected'          => 1,
+                'request_for_approval' => 0,
+                'rejected_reason'      => $reason ?: null,
+                'approved_at'          => null,
+                'approved_by'          => null,
+                'draft_data'           => null,
+            ];
+
+            $payload = $this->buildSafeUpdatePayload($table, $rejectPayload, $request);
+
+            if (empty($payload)) {
+                DB::rollBack();
+
+                // ✅ Log: no updatable columns
+                $this->logActivity(
+                    $request,
+                    'reject',
+                    'master_approval',
+                    $table,
+                    isset($before->id) ? (int)$before->id : null,
+                    [],
+                    [],
+                    [],
+                    "Reject blocked: no updatable approval columns. uuid={$uuid}, division_key={$target['division_key']}, reason=" . ($reason ?: '')
+                );
+
+                return response()->json([
+                    'success' => false,
+                    'message' => "No updatable approval columns found on table: {$table}",
+                ], 422);
+            }
+
+            DB::table($table)->where('uuid', $uuid)->update($payload);
+
+            // ✅ Log to content_approval_logs
+            DB::table('content_approval_logs')->insert([
+                'model_type'  => $table,
+                'model_id'    => (int) $before->id,
+                'user_id'     => (int) ($request->attributes->get('auth_tokenable_id') ?? 0),
+                'action'      => 'rejected',
+                'from_status' => (string) ($before->workflow_status ?? ''),
+                'to_status'   => 'rejected',
+                'comment'     => $reason ?: null,
+                'created_at'  => Carbon::now(),
+                'updated_at'  => Carbon::now(),
+            ]);
+
+            $updated = DB::table($table)->where('uuid', $uuid)->first();
+
+            DB::commit();
+
+            // ✅ Log AFTER commit
+            $changedFields = array_keys($payload);
+            $oldValues = $this->pickFieldsFromRow($before, $changedFields);
+            $newValues = $this->pickFieldsFromRow($updated, $changedFields);
+
+            $recordId = null;
+            if ($updated && isset($updated->id)) $recordId = (int)$updated->id;
+            elseif ($before && isset($before->id)) $recordId = (int)$before->id;
+
+            $this->logActivity(
+                $request,
+                'reject',
+                'master_approval',
+                $table,
+                $recordId,
+                $changedFields,
+                $oldValues,
+                $newValues,
+                "Rejected successfully. uuid={$uuid}, division_key={$target['division_key']}, reason=" . ($reason ?: '')
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Rejected successfully.',
+                'division_key' => $target['division_key'],
+                'table' => $table,
+                'reason' => $reason,
+                'item' => $updated,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            // ✅ Log error (outside transaction)
+            $this->logActivity(
+                $request,
+                'reject',
+                'master_approval',
+                $target['table'] ?? 'unknown',
+                isset($target['row']->id) ? (int)$target['row']->id : null,
+                null,
+                null,
+                null,
+                "Reject failed (exception): {$e->getMessage()}. uuid={$uuid}, hint_division_key=" . ($hint ?: '') . ", reason=" . ($reason ?: '')
+            );
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Reject failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ GET: /api/master-approval/logs/{table}/{id}
+     * Fetches approval/rejection history for a record.
+     */
+    public function history(Request $request, string $table, $id)
+    {
+        try {
+            // Find the record to get its ID if UUID was passed
+            $query = DB::table($table);
+            if (ctype_digit((string)$id)) {
+                $query->where('id', (int)$id);
+            } else {
+                $query->where('uuid', (string)$id);
+            }
+            $row = $query->first();
+
+            if (!$row) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Record not found',
+                    'data'    => []
+                ], 404);
+            }
+
+            $realId = (int) $row->id;
+
+            $logs = DB::table('content_approval_logs')
+                ->where('model_type', $table)
+                ->where('model_id', $realId)
+                ->leftJoin('users', 'users.id', '=', 'content_approval_logs.user_id')
+                ->select(
+                    'content_approval_logs.*',
+                    'users.name as user_name',
+                    'users.role as user_role'
+                )
+                ->orderBy('content_approval_logs.created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data'    => $logs
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'History fetch error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+}

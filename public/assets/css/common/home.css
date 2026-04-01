@@ -55,8 +55,7 @@ ul { list-style: none; }
    HEADER
    ============================================================ */
 .site-header {
-    position: sticky;
-    top: 0;
+
     z-index: 1000;
     width: 100%;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);

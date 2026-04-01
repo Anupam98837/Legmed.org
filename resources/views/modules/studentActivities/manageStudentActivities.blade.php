@@ -1,0 +1,2155 @@
+{{-- resources/views/modules/studentActivity/manageStudentActivities.blade.php --}}
+@section('title','Student Activities')
+
+@push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<link rel="stylesheet" href="{{ asset('assets/css/common/main.css') }}">
+
+<style>
+/* =====================
+  Page shell
+===================== */
+.sa-wrap{max-width:1140px;margin:16px auto 40px;overflow:visible}
+.sa-panel{
+  background:var(--surface);
+  border:1px solid var(--line-strong);
+  border-radius:16px;
+  box-shadow:var(--shadow-2);
+  padding:14px;
+  overflow:visible;
+}
+
+/* Tabs */
+.nav.nav-tabs{border-color:var(--line-strong)}
+.nav-tabs .nav-link{color:var(--ink)}
+.nav-tabs .nav-link.active{
+  background:var(--surface);
+  border-color:var(--line-strong) var(--line-strong) var(--surface)
+}
+.tab-content,.tab-pane{overflow:visible}
+
+/* Table card */
+.sa-table.card{
+  position:relative;
+  border:1px solid var(--line-strong);
+  border-radius:16px;
+  background:var(--surface);
+  box-shadow:var(--shadow-2);
+  overflow:visible;
+}
+.sa-table .card-body{overflow:visible}
+.table{--bs-table-bg:transparent}
+.table thead th{
+  font-weight:600;
+  color:var(--muted-color);
+  font-size:13px;
+  border-bottom:1px solid var(--line-strong);
+  background:var(--surface)
+}
+.table thead.sticky-top{z-index:3}
+.table tbody tr{border-top:1px solid var(--line-soft)}
+.table tbody tr:hover{background:var(--page-hover)}
+.small{font-size:12.5px}
+
+/* Slug column */
+th.col-slug, td.col-slug{width:190px;max-width:190px}
+td.col-slug{overflow:hidden}
+td.col-slug code{
+  display:inline-block;
+  max-width:180px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  vertical-align:bottom;
+}
+
+/* Toolbar */
+.sa-toolbar .form-control,
+.sa-toolbar .form-select{
+  height:40px;
+  border-radius:12px;
+  border:1px solid var(--line-strong);
+  background:var(--surface);
+}
+.sa-toolbar .btn{border-radius:12px}
+
+/* Dropdown in table */
+.sa-table .dropdown{position:relative}
+/* ✅ match reference: use a dedicated toggle class, manually controlled via JS */
+.sa-table .sa-dd-toggle{border-radius:10px}
+.sa-table .dropdown-menu{
+  border-radius:12px;
+  border:1px solid var(--line-strong);
+  box-shadow:var(--shadow-2);
+  min-width:240px;
+  z-index:99999; /* ✅ higher + will be positioned with strategy:fixed */
+}
+.sa-table .dropdown-menu.show{display:block !important}
+.sa-table .dropdown-item{display:flex;align-items:center;gap:.6rem}
+.sa-table .dropdown-item i{width:16px;text-align:center}
+.sa-table .dropdown-item.text-danger{color:var(--danger-color) !important}
+
+/* Badges */
+.badge-soft-success{
+  background:color-mix(in oklab, var(--success-color) 12%, transparent);
+  color:var(--success-color)
+}
+.badge-soft-warning{
+  background:color-mix(in oklab, var(--warning-color, #f59e0b) 14%, transparent);
+  color:var(--warning-color, #f59e0b)
+}
+.badge-soft-muted{
+  background:color-mix(in oklab, var(--muted-color) 10%, transparent);
+  color:var(--muted-color)
+}
+.badge-soft-primary{
+  background:color-mix(in oklab, var(--primary-color) 12%, transparent);
+  color:var(--primary-color)
+}
+.badge-soft-danger{
+  background:color-mix(in oklab, var(--danger-color) 12%, transparent);
+  color:var(--danger-color)
+}
+.badge-soft-info{
+  background:color-mix(in oklab, var(--info-color, #0ea5e9) 12%, transparent);
+  color:var(--info-color, #0ea5e9)
+}
+
+/* Timeline Styles */
+.timeline {
+  position: relative;
+  padding: 0;
+  list-style: none;
+}
+.timeline:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 31px;
+  width: 2px;
+  background: var(--line-soft);
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+.timeline-marker {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--primary-color);
+  z-index: 10;
+}
+.timeline-content {
+  margin-left: 60px;
+  padding: 12px 16px;
+  background: color-mix(in oklab, var(--surface) 95%, var(--bg-body));
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+}
+.timeline-date {
+  font-size: 11px;
+  color: var(--muted-color);
+  margin-bottom: 4px;
+}
+.timeline-title {
+  font-weight: 600;
+  font-size: 13.5px;
+  margin-bottom: 4px;
+}
+.timeline-author {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.timeline-comment {
+  font-size: 12.5px;
+  color: var(--muted-color);
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.03);
+  border-left: 2px solid var(--line-strong);
+  font-style: italic;
+}
+.badge-pending-draft {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--warning-color);
+  color: #fff;
+  vertical-align: middle;
+  margin-left: 4px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+/* Responsive + horizontal scroll */
+.table-responsive{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto !important;
+  overflow-y:visible !important;
+  -webkit-overflow-scrolling:touch;
+  position:relative;
+}
+.table-responsive > .table{width:max-content;min-width:1180px;}
+.table-responsive th,.table-responsive td{white-space:nowrap;}
+@media (max-width: 576px){ .table-responsive > .table{min-width:1120px;} }
+
+@media (max-width: 768px){
+  .sa-toolbar .d-flex{flex-direction:column;gap:12px !important}
+  .sa-toolbar .position-relative{min-width:100% !important}
+  .sa-toolbar .toolbar-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .sa-toolbar .toolbar-actions .btn{flex:1;min-width:130px}
+}
+
+/* Loading overlay */
+.sa-loading{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  backdrop-filter:blur(2px);
+}
+.sa-loading .box{
+  background:var(--surface);
+  padding:20px 22px;
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 10px 26px rgba(0,0,0,0.3)
+}
+.sa-loading .spin{
+  width:40px;height:40px;border-radius:50%;
+  border:4px solid rgba(148,163,184,0.3);
+  border-top:4px solid var(--primary-color);
+  animation:saSpin 1s linear infinite
+}
+@keyframes saSpin{to{transform:rotate(360deg)}}
+
+/* Button loading */
+.btn-loading{position:relative;color:transparent !important}
+.btn-loading::after{
+  content:'';
+  position:absolute;
+  width:16px;height:16px;
+  top:50%;left:50%;
+  margin:-8px 0 0 -8px;
+  border:2px solid transparent;
+  border-top:2px solid currentColor;
+  border-radius:50%;
+  animation:saSpin 1s linear infinite;
+}
+
+/* =========================
+  Mini RTE (stable caret)
+========================= */
+.rte-help{font-size:12px;color:var(--muted-color);margin-top:6px}
+.rte-box{
+  border:1px solid var(--line-strong);
+  border-radius:14px;
+  overflow:hidden;
+  background:var(--surface);
+}
+.rte-bar{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  padding:8px;
+  border-bottom:1px solid var(--line-strong);
+  background:color-mix(in oklab, var(--surface) 92%, transparent);
+}
+.rte-btn{
+  border:1px solid var(--line-soft);
+  background:transparent;
+  color:var(--ink);
+  padding:7px 9px;
+  border-radius:10px;
+  line-height:1;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  user-select:none;
+}
+.rte-btn:hover{background:var(--page-hover)}
+.rte-btn.active{
+  background:color-mix(in oklab, var(--primary-color) 14%, transparent);
+  border-color:color-mix(in oklab, var(--primary-color) 35%, var(--line-soft));
+}
+.rte-sep{width:1px;height:24px;background:var(--line-soft);margin:0 4px}
+.rte-modes{
+  margin-left:auto;
+  display:flex;
+  border:1px solid var(--line-soft);
+  border-radius:0;
+  overflow:hidden;
+}
+.rte-modes button{
+  border:0;border-right:1px solid var(--line-soft);
+  border-radius:0;
+  padding:7px 12px;
+  font-size:12px;
+  cursor:pointer;
+  background:transparent;
+  color:var(--ink);
+  line-height:1;
+}
+.rte-modes button:last-child{border-right:0}
+.rte-modes button.active{
+  background:color-mix(in oklab, var(--primary-color) 12%, transparent);
+  font-weight:800;
+}
+.rte-area{position:relative}
+.rte-editor{
+  min-height:220px;
+  padding:12px;
+  outline:none;
+}
+.rte-editor:empty:before{content:attr(data-placeholder);color:var(--muted-color)}
+.rte-code{
+  display:none;
+  width:100%;
+  min-height:220px;
+  padding:12px;
+  border:0;
+  outline:none;
+  resize:vertical;
+  background:transparent;
+  color:var(--ink);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  font-size:12.5px;
+  line-height:1.45;
+}
+.rte-box.mode-code .rte-editor{display:none}
+.rte-box.mode-code .rte-code{display:block}
+
+/* Cover preview */
+.cover-box{
+  border:1px solid var(--line-strong);
+  border-radius:14px;
+  overflow:hidden;
+  background:color-mix(in oklab, var(--surface) 88%, var(--bg-body));
+}
+.cover-box .top{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 12px;
+  border-bottom:1px solid var(--line-soft);
+}
+.cover-box .body{padding:12px}
+.cover-box img{
+  width:100%;
+  max-height:260px;
+  object-fit:cover;
+  border-radius:12px;
+  border:1px solid var(--line-soft);
+  background:#fff;
+}
+.cover-empty{
+  padding:12px;
+  border:1px dashed var(--line-soft);
+  border-radius:12px;
+  color:var(--muted-color);
+  font-size:12.5px;
+}
+</style>
+@endpush
+
+@section('content')
+<div class="sa-wrap">
+
+  {{-- Global loading --}}
+  <div id="saLoading" class="sa-loading">
+    @include('partials.overlay')
+  </div>
+
+  {{-- Tabs --}}
+  <ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" data-bs-toggle="tab" href="#sa-tab-active" role="tab" aria-selected="true">
+        <i class="fa-solid fa-bolt me-2"></i>Active
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="tab" href="#sa-tab-inactive" role="tab" aria-selected="false">
+        <i class="fa-solid fa-circle-pause me-2"></i>Inactive
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="tab" href="#sa-tab-trash" role="tab" aria-selected="false">
+        <i class="fa-solid fa-trash-can me-2"></i>Trash
+      </a>
+    </li>
+  </ul>
+
+  {{-- Toolbar (shared) --}}
+  <div class="row align-items-center g-2 mb-3 sa-toolbar sa-panel">
+    <div class="col-12 col-lg d-flex align-items-center flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <label class="text-muted small mb-0">Per Page</label>
+        <select id="saPerPage" class="form-select" style="width:96px;">
+          <option>10</option>
+          <option selected>20</option>
+          <option>50</option>
+          <option>100</option>
+        </select>
+      </div>
+
+      <div class="position-relative" style="min-width:280px;">
+        <input id="saSearch" type="search" class="form-control ps-5" placeholder="Search by title or slug…">
+        <i class="fa fa-search position-absolute" style="left:12px;top:50%;transform:translateY(-50%);opacity:.6;"></i>
+      </div>
+
+      <button id="saBtnFilter" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#saFilterModal">
+        <i class="fa fa-sliders me-1"></i>Filter
+      </button>
+
+      <button id="saBtnReset" class="btn btn-light">
+        <i class="fa fa-rotate-left me-1"></i>Reset
+      </button>
+    </div>
+
+    <div class="col-12 col-lg-auto ms-lg-auto d-flex justify-content-lg-end">
+      <div class="toolbar-actions" id="saWriteControls" style="display:none;">
+        <button type="button" class="btn btn-primary" id="saBtnAdd">
+          <i class="fa fa-plus me-1"></i>Add Student Activity
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content mb-3">
+
+    {{-- ACTIVE --}}
+    <div class="tab-pane fade show active" id="sa-tab-active" role="tabpanel">
+      <div class="card sa-table">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-borderless align-middle mb-0">
+              <thead class="sticky-top">
+                <tr>
+                  <th>Title</th>
+                  <th class="col-slug">Slug</th>
+                  <th style="width:190px;">Department</th>
+                  <th style="width:120px;">Status</th>
+                  <th style="width:120px;">Featured</th>
+                  <th style="width:160px;">Publish At</th>
+                  <th style="width:110px;">Views</th>
+                  <th style="width:170px;">Updated</th>
+                  <th style="width:110px;" class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="saTbodyActive">
+                <tr><td colspan="10" class="text-center text-muted" style="padding:38px;">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="saEmptyActive" class="p-4 text-center" style="display:none;">
+            <i class="fa-solid fa-bolt mb-2" style="font-size:32px;opacity:.6;"></i>
+            <div>No active student activities found.</div>
+          </div>
+
+          <div class="d-flex flex-wrap align-items-center justify-content-between p-3 gap-2">
+            <div class="text-muted small" id="saInfoActive">—</div>
+            <nav><ul id="saPagerActive" class="pagination mb-0"></ul></nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{-- INACTIVE --}}
+    <div class="tab-pane fade" id="sa-tab-inactive" role="tabpanel">
+      <div class="card sa-table">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-borderless align-middle mb-0">
+              <thead class="sticky-top">
+                <tr>
+                  <th>Title</th>
+                  <th class="col-slug">Slug</th>
+                  <th style="width:190px;">Department</th>
+                  <th style="width:120px;">Status</th>
+                  <th style="width:120px;">Featured</th>
+                  <th style="width:160px;">Publish At</th>
+                  <th style="width:110px;">Views</th>
+                  <th style="width:170px;">Updated</th>
+                  <th style="width:110px;" class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="saTbodyInactive">
+                <tr><td colspan="10" class="text-center text-muted" style="padding:38px;">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="saEmptyInactive" class="p-4 text-center" style="display:none;">
+            <i class="fa-solid fa-circle-pause mb-2" style="font-size:32px;opacity:.6;"></i>
+            <div>No inactive student activities found.</div>
+          </div>
+
+          <div class="d-flex flex-wrap align-items-center justify-content-between p-3 gap-2">
+            <div class="text-muted small" id="saInfoInactive">—</div>
+            <nav><ul id="saPagerInactive" class="pagination mb-0"></ul></nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{-- TRASH --}}
+    <div class="tab-pane fade" id="sa-tab-trash" role="tabpanel">
+      <div class="card sa-table">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-borderless align-middle mb-0">
+              <thead class="sticky-top">
+                <tr>
+                  <th>Title</th>
+                  <th class="col-slug">Slug</th>
+                  <th style="width:220px;">Department</th>
+                  <th style="width:180px;">Deleted</th>
+                  <th style="width:110px;" class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="saTbodyTrash">
+                <tr><td colspan="5" class="text-center text-muted" style="padding:38px;">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="saEmptyTrash" class="p-4 text-center" style="display:none;">
+            <i class="fa-solid fa-trash-can mb-2" style="font-size:32px;opacity:.6;"></i>
+            <div>Trash is empty.</div>
+          </div>
+
+          <div class="d-flex flex-wrap align-items-center justify-content-between p-3 gap-2">
+            <div class="text-muted small" id="saInfoTrash">—</div>
+            <nav><ul id="saPagerTrash" class="pagination mb-0"></ul></nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{{-- Filter Modal --}}
+<div class="modal fade" id="saFilterModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa fa-sliders me-2"></i>Filter</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Status</label>
+            <select id="saModalStatus" class="form-select">
+              <option value="">(Tab default)</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="archived">Archived</option>
+            </select>
+            <div class="form-text">If you leave this as “Tab default”, Active = Published and Inactive = Draft.</div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Sort By</label>
+            <select id="saModalSort" class="form-select">
+              <option value="-created_at">Newest First</option>
+              <option value="created_at">Oldest First</option>
+              <option value="title">Title A-Z</option>
+              <option value="-title">Title Z-A</option>
+              <option value="-publish_at">Publish At (Desc)</option>
+              <option value="publish_at">Publish At (Asc)</option>
+              <option value="-expire_at">Expire At (Desc)</option>
+              <option value="expire_at">Expire At (Asc)</option>
+              <option value="-views_count">Most Viewed</option>
+              <option value="views_count">Least Viewed</option>
+              <option value="-id">ID (Desc)</option>
+              <option value="id">ID (Asc)</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Featured</label>
+            <select id="saModalFeatured" class="form-select">
+              <option value="">Any</option>
+              <option value="1">Featured only</option>
+              <option value="0">Not featured</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="saBtnApplyFilters" class="btn btn-primary">
+          <i class="fa fa-check me-1"></i>Apply
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Add/Edit/View Modal --}}
+<div class="modal fade" id="saItemModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <form class="modal-content" id="saItemForm" autocomplete="off">
+      <div class="modal-header">
+        <h5 class="modal-title" id="saItemModalTitle">Add Student Activity</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="saUuid">
+        <input type="hidden" id="saId">
+        <input type="hidden" id="saCoverRemove" value="0">
+
+        {{-- Rejection Alert --}}
+        <div id="saRejectionAlert" class="alert alert-danger mb-3" style="display:none;">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="fa fa-circle-exclamation fs-5"></i>
+            <h6 class="mb-0 fw-bold">Rejected by Authority</h6>
+          </div>
+          <div id="saRejectionReasonText" class="ms-4 small" style="white-space: pre-wrap;">Reason...</div>
+          <div class="mt-2 ms-4">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="viewSaHistoryFromAlert()">
+              <i class="fa fa-clock-rotate-left me-1"></i>View Full History
+            </button>
+          </div>
+        </div>
+
+        {{-- Pending Draft Alert --}}
+        <div id="saDraftAlert" class="alert alert-warning mb-3" style="display:none;">
+          <div class="d-flex align-items-center gap-2">
+            <i class="fa fa-pen-nib fs-5"></i>
+            <h6 class="mb-0 fw-bold">Pending Changes</h6>
+          </div>
+          <div class="ms-4 small">This item has updates waiting for approval. Editing now will replace those pending changes.</div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-lg-6">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Title <span class="text-danger">*</span></label>
+                <input class="form-control" id="saTitle" required maxlength="255" placeholder="e.g., Tech Fest 2025 Highlights">
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Slug (optional)</label>
+                <input class="form-control" id="saSlug" maxlength="160" placeholder="tech-fest-2025-highlights">
+                <div class="form-text">Auto-generated from title until you edit this field manually.</div>
+              </div>
+
+              {{-- ✅ Department (added) --}}
+              <div class="col-12">
+                <label class="form-label">Department</label>
+                <select class="form-select" id="saDepartmentId">
+                  <option value="">Loading departments…</option>
+                </select>
+                <div class="form-text">Select the department (dropdown shows only the department name).</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="saStatus">
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Featured on Home</label>
+                <select class="form-select" id="saFeatured">
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Publish At</label>
+                <input type="datetime-local" class="form-control" id="saPublishAt">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Expire At</label>
+                <input type="datetime-local" class="form-control" id="saExpireAt">
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Cover Image (optional)</label>
+                <input type="file" class="form-control" id="saCover" accept="image/*">
+                <div class="form-text">Upload an image (optional).</div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Attachments (optional)</label>
+                <input type="file" class="form-control" id="saAttachments" multiple>
+                <div class="form-text">Optional multiple attachments.</div>
+                <div class="small text-muted mt-2" id="saCurrentAttachmentsInfo" style="display:none;">
+                  <i class="fa fa-paperclip me-1"></i><span id="saCurrentAttachmentsText">—</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            {{-- RTE --}}
+            <div class="mb-2">
+              <label class="form-label">Body (HTML allowed) <span class="text-danger">*</span></label>
+
+              <div class="rte-box" id="saRteBox">
+                <div class="rte-bar">
+                  <button type="button" class="rte-btn" data-cmd="bold" title="Bold"><i class="fa fa-bold"></i></button>
+                  <button type="button" class="rte-btn" data-cmd="italic" title="Italic"><i class="fa fa-italic"></i></button>
+                  <button type="button" class="rte-btn" data-cmd="underline" title="Underline"><i class="fa fa-underline"></i></button>
+
+                  <span class="rte-sep"></span>
+
+                  <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Bullets"><i class="fa fa-list-ul"></i></button>
+                  <button type="button" class="rte-btn" data-cmd="insertOrderedList" title="Numbering"><i class="fa fa-list-ol"></i></button>
+
+                  <span class="rte-sep"></span>
+
+                  <button type="button" class="rte-btn" data-block="h2" title="Heading">H2</button>
+                  <button type="button" class="rte-btn" data-block="h3" title="Subheading">H3</button>
+
+                  <span class="rte-sep"></span>
+
+                  <button type="button" class="rte-btn" data-insert="pre" title="Code Block"><i class="fa fa-code"></i></button>
+                  <button type="button" class="rte-btn" data-insert="code" title="Inline Code"><i class="fa fa-terminal"></i></button>
+
+                  <span class="rte-sep"></span>
+
+                  <button type="button" class="rte-btn" data-cmd="removeFormat" title="Clear"><i class="fa fa-eraser"></i></button>
+
+                  <div class="rte-modes">
+                    <button type="button" class="active" data-mode="text">Text</button>
+                    <button type="button" data-mode="code">Code</button>
+                  </div>
+                </div>
+
+                <div class="rte-area">
+                  <div id="saBodyEditor" class="rte-editor" contenteditable="true" data-placeholder="Write student activity content…"></div>
+                  <textarea id="saBodyCode" class="rte-code" spellcheck="false" placeholder="HTML code…"></textarea>
+                </div>
+              </div>
+
+              <div class="rte-help">Use <b>Text</b> for rich editing or <b>Code</b> to paste HTML.</div>
+              <input type="hidden" id="saBody">
+            </div>
+
+            {{-- Cover preview --}}
+            <div class="cover-box mt-3">
+              <div class="top">
+                <div class="fw-semibold"><i class="fa fa-image me-2"></i>Cover Preview</div>
+                <div class="d-flex align-items-center gap-2">
+                  <button type="button" class="btn btn-light btn-sm" id="saBtnOpenCover" style="display:none;">
+                    <i class="fa fa-up-right-from-square me-1"></i>Open
+                  </button>
+                  <button type="button" class="btn btn-outline-danger btn-sm" id="saBtnRemoveCover" style="display:none;">
+                    <i class="fa fa-trash me-1"></i>Remove
+                  </button>
+                </div>
+              </div>
+              <div class="body">
+                <img id="saCoverPreview" src="" alt="Cover preview" style="display:none;">
+                <div id="saCoverEmpty" class="cover-empty">No cover selected.</div>
+                <div class="text-muted small mt-2" id="saCoverMeta" style="display:none;">—</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="saSaveBtn">
+          <i class="fa fa-floppy-disk me-1"></i>Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- Toasts --}}
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:2000">
+  <div id="saToastOk" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="saToastOkText">Done</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+  <div id="saToastErr" class="toast align-items-center text-bg-danger border-0 mt-2" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="saToastErrText">Something went wrong</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+@endsection
+
+{{-- Workflow History Modal --}}
+<div class="modal fade" id="saHistoryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-md modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa fa-clock-rotate-left me-2"></i>Workflow History</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="saHistoryLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="mt-2 text-muted">Loading history…</div>
+        </div>
+        <div id="saHistoryContent" style="display:none;">
+          <ul class="timeline" id="saHistoryTimeline"></ul>
+        </div>
+        <div id="saHistoryEmpty" class="text-center py-4 text-muted" style="display:none;">
+          <i class="fa fa-history mb-2 fs-3 opacity-50"></i>
+          <div>No history found for this item.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+(() => {
+  if (window.__STUDENT_ACTIVITIES_MODULE_INIT__) return;
+  window.__STUDENT_ACTIVITIES_MODULE_INIT__ = true;
+
+  const $ = (id) => document.getElementById(id);
+  const debounce = (fn, ms=300) => { let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; };
+
+  function esc(str){
+    return (str ?? '').toString().replace(/[&<>"']/g, s => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[s]));
+  }
+
+  function slugify(s){
+    return (s || '')
+      .toString()
+      .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
+      .trim().toLowerCase()
+      .replace(/['"`]/g,'')
+      .replace(/[^a-z0-9]+/g,'-')
+      .replace(/-+/g,'-')
+      .replace(/^-|-$/g,'');
+  }
+
+  function bytes(n){
+    const b = Number(n || 0);
+    if (!b) return '—';
+    const u = ['B','KB','MB','GB'];
+    let i=0, v=b;
+    while (v>=1024 && i<u.length-1){ v/=1024; i++; }
+    return `${v.toFixed(i?1:0)} ${u[i]}`;
+  }
+
+  function normalizeUrl(url){
+    const u = (url || '').toString().trim();
+    if (!u) return '';
+    if (/^(data:|blob:|https?:\/\/)/i.test(u)) return u;
+    if (u.startsWith('/')) return window.location.origin + u;
+    return window.location.origin + '/' + u;
+  }
+
+  async function fetchWithTimeout(url, opts={}, ms=15000){
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), ms);
+    try{ return await fetch(url, { ...opts, signal: ctrl.signal }); }
+    finally{ clearTimeout(t); }
+  }
+
+  function statusBadge(status, hasDraft){
+    const s = (status || '').toString().toLowerCase();
+    let html = '';
+    if (s === 'published') html = `<span class="badge badge-soft-success">Published</span>`;
+    else if (s === 'draft') html = `<span class="badge badge-soft-warning">Draft</span>`;
+    else if (s === 'archived') html = `<span class="badge badge-soft-muted">Archived</span>`;
+    else html = `<span class="badge badge-soft-muted">${esc(s || '—')}</span>`;
+
+    if (hasDraft) {
+      html += `<span class="badge-pending-draft" title="Pending Changes">Draft</span>`;
+    }
+    return html;
+  }
+
+  function workflowBadge(ws){
+    const s = (ws || '').toString().toLowerCase();
+    if (s === 'pending_check') return `<span class="badge-soft-warning p-1 px-2 rounded-pill small"><i class="fa fa-hourglass-start me-1"></i>Pending Check</span>`;
+    if (s === 'checked') return `<span class="badge-soft-info p-1 px-2 rounded-pill small"><i class="fa fa-check-double me-1"></i>Checked</span>`;
+    if (s === 'approved') return `<span class="badge-soft-success p-1 px-2 rounded-pill small"><i class="fa fa-circle-check me-1"></i>Approved</span>`;
+    if (s === 'rejected') return `<span class="badge-soft-danger p-1 px-2 rounded-pill small"><i class="fa fa-circle-xmark me-1"></i>Rejected</span>`;
+    return `<span class="badge-soft-muted p-1 px-2 rounded-pill small">${esc(s || '—')}</span>`;
+  }
+
+  function featuredBadge(v){
+    return v ? `<span class="badge badge-soft-primary">Yes</span>` : `<span class="badge badge-soft-muted">No</span>`;
+  }
+
+  function toLocal(s){
+    if (!s) return '';
+    const t = String(s).replace(' ', 'T');
+    return t.length >= 16 ? t.slice(0,16) : t;
+  }
+
+  function ensurePreHasCode(html){
+    return (html || '').replace(/<pre>([\s\S]*?)<\/pre>/gi, (m, inner) => {
+      if (/<code[\s>]/i.test(inner)) return `<pre>${inner}</pre>`;
+      return `<pre><code>${inner}</code></pre>`;
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token') || '';
+    if (!token) { window.location.href = '/'; return; }
+
+    const loadingEl = $('saLoading');
+    const showLoading = (v) => { if (loadingEl) loadingEl.style.display = v ? 'flex' : 'none'; };
+
+    const toastOkEl = $('saToastOk');
+    const toastErrEl = $('saToastErr');
+    const toastOk = toastOkEl ? new bootstrap.Toast(toastOkEl) : null;
+    const toastErr = toastErrEl ? new bootstrap.Toast(toastErrEl) : null;
+    const ok = (m) => { const el=$('saToastOkText'); if(el) el.textContent=m||'Done'; toastOk && toastOk.show(); };
+    const err = (m) => { const el=$('saToastErrText'); if(el) el.textContent=m||'Something went wrong'; toastErr && toastErr.show(); };
+
+    const authHeaders = () => ({
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/json'
+    });
+
+    // Toolbar controls
+    const perPageSel = $('saPerPage');
+    const searchInput = $('saSearch');
+    const btnReset = $('saBtnReset');
+    const btnApplyFilters = $('saBtnApplyFilters');
+    const writeControls = $('saWriteControls');
+    const btnAdd = $('saBtnAdd');
+
+    // Filter modal
+    const filterModalEl = $('saFilterModal');
+    const filterModal = filterModalEl ? new bootstrap.Modal(filterModalEl) : null;
+    const modalStatus = $('saModalStatus');
+    const modalSort = $('saModalSort');
+    const modalFeatured = $('saModalFeatured');
+
+    // Tables
+    const tbodyActive = $('saTbodyActive');
+    const tbodyInactive = $('saTbodyInactive');
+    const tbodyTrash = $('saTbodyTrash');
+
+    const emptyActive = $('saEmptyActive');
+    const emptyInactive = $('saEmptyInactive');
+    const emptyTrash = $('saEmptyTrash');
+
+    const pagerActive = $('saPagerActive');
+    const pagerInactive = $('saPagerInactive');
+    const pagerTrash = $('saPagerTrash');
+
+    const infoActive = $('saInfoActive');
+    const infoInactive = $('saInfoInactive');
+    const infoTrash = $('saInfoTrash');
+
+    // Item modal
+    const itemModalEl = $('saItemModal');
+    const itemModal = itemModalEl ? new bootstrap.Modal(itemModalEl) : null;
+    const itemModalTitle = $('saItemModalTitle');
+    const itemForm = $('saItemForm');
+    const saveBtn = $('saSaveBtn');
+
+    const fUuid = $('saUuid');
+    const fId = $('saId');
+    const fCoverRemove = $('saCoverRemove');
+
+    const fTitle = $('saTitle');
+    const fSlug = $('saSlug');
+
+    // ✅ Department dropdown (added)
+    const fDepartmentId = $('saDepartmentId');
+
+    const fStatus = $('saStatus');
+    const fFeatured = $('saFeatured');
+    const fPublishAt = $('saPublishAt');
+    const fExpireAt = $('saExpireAt');
+    const fCover = $('saCover');
+    const fAttachments = $('saAttachments');
+
+    const currentAttachmentsInfo = $('saCurrentAttachmentsInfo');
+    const currentAttachmentsText = $('saCurrentAttachmentsText');
+
+    const btnOpenCover = $('saBtnOpenCover');
+    const btnRemoveCover = $('saBtnRemoveCover');
+    const coverPreview = $('saCoverPreview');
+    const coverEmpty = $('saCoverEmpty');
+    const coverMeta = $('saCoverMeta');
+
+    // RTE
+    const rte = {
+      box: $('saRteBox'),
+      bar: document.querySelector('#saRteBox .rte-bar'),
+      editor: $('saBodyEditor'),
+      code: $('saBodyCode'),
+      hidden: $('saBody'),
+      mode: 'text',
+      enabled: true
+    };
+
+    // Exposed
+    const saModule = {
+      openModal,
+      reload: () => loadTab(getTabKey()),
+      showHistory
+    };
+
+    // Permissions
+    const ACTOR = { id: null, role: '', department_id: null };
+    let canAssignPrivilege = false;
+    let canCreate=false, canEdit=false, canDelete=false;
+    let canPublish = false;
+
+    function computePermissions(){
+      const r = (ACTOR?.role || '').toLowerCase();
+      if(!ACTOR.department_id){
+          canCreate = canEdit = canDelete = canAssignPrivilege = true;
+      } else {
+          canCreate = canEdit = canDelete = canAssignPrivilege = false;
+          if (window.ACTOR_MENU_TREE && Array.isArray(window.ACTOR_MENU_TREE)) {
+             const path = window.location.pathname.replace(/\/+$/, '') || '/';
+             let myActions = [];
+             for(const group of window.ACTOR_MENU_TREE) {
+                if(group.children) {
+                   for(const child of group.children) {
+                      const childPath = (child.href || '').replace(/\/+$/, '') || '/';
+                      if (path === childPath || path.endsWith(childPath)) {
+                         myActions = child.actions || [];
+                         break;
+                      }
+                   }
+                }
+             }
+             const actionsStr = myActions.map(a => String(a).trim().toLowerCase());
+             if (actionsStr.includes('add') || actionsStr.includes('create')) canCreate = true;
+             if (actionsStr.includes('edit') || actionsStr.includes('update')) canEdit = true;
+             if (actionsStr.includes('delete') || actionsStr.includes('remove')) canDelete = true;
+             if (actionsStr.includes('assign_privilege') || actionsStr.includes('assign privileges') || actionsStr.includes('privilege')) canAssignPrivilege = true;
+          }
+      }
+      canPublish = true;
+
+      if (writeControls) writeControls.style.display = canCreate ? 'flex' : 'none';
+      updatePublishOption();
+    }
+
+    function updatePublishOption(){
+      if (!fStatus) return;
+      const publishOption = fStatus.querySelector('option[value="published"]');
+      if (publishOption){
+        publishOption.style.display = canPublish ? '' : 'none';
+        if (!canPublish && fStatus.value === 'published'){
+          fStatus.value = 'draft';
+        }
+      }
+    }
+
+    async function fetchMe(){
+      try{
+        const res = await fetchWithTimeout('/api/users/me', { headers: authHeaders() }, 8000);
+        if (res.ok){
+          const js = await res.json().catch(()=> ({}));
+          const role = js?.data?.role || js?.role;
+          if (role) ACTOR.role = String(role).toLowerCase();
+          const deptId = js?.data?.department_id || js?.department_id;
+          if (deptId) ACTOR.department_id = deptId;
+        }
+      }catch(_){}
+      if (!ACTOR.role){
+        ACTOR.role = (sessionStorage.getItem('role') || localStorage.getItem('role') || '').toLowerCase();
+      }
+      
+      if (!window.ACTOR_MENU_TREE) {
+        try {
+          const mRes = await fetchWithTimeout('/api/my/sidebar-menus?with_actions=1', { headers: authHeaders() }, 5000);
+          if (mRes.ok) {
+              const mData = await mRes.json();
+              window.ACTOR_MENU_TREE = mData?.tree || [];
+          }
+        } catch(e) {}
+      }
+      computePermissions();
+    }
+
+    let departmentsLoaded = false;
+    async function loadDepartmentsForForm(selected=''){
+      if (!fDepartmentId) return;
+      fDepartmentId.innerHTML = `<option value="">Loading departments…</option>`;
+      fDepartmentId.disabled = true;
+      try{
+        const res = await fetchWithTimeout('/api/departments', { headers: authHeaders() }, 15000);
+        const js = await res.json().catch(()=> ({}));
+        if (!res.ok) throw new Error(js?.message || 'Failed to load');
+        const list = Array.isArray(js.data) ? js.data : [];
+        let html = `<option value="">Select department</option>`;
+        html += list.map(d => `<option value="${esc(d.id)}">${esc(d.title || d.name)}</option>`).join('');
+        fDepartmentId.innerHTML = html;
+        fDepartmentId.disabled = false;
+        if (selected) fDepartmentId.value = String(selected);
+      }catch(ex){
+        fDepartmentId.innerHTML = `<option value="">Select department</option>`;
+        fDepartmentId.disabled = false;
+      }
+    }
+
+    const state = {
+      filters: { q:'', status:'', featured:'', sort:'-created_at' },
+      perPage: parseInt(perPageSel?.value || '20', 10) || 20,
+      tabs: {
+        active:   { page:1, lastPage:1, items:[] },
+        inactive: { page:1, lastPage:1, items:[] },
+        trash:    { page:1, lastPage:1, items:[] }
+      }
+    };
+
+    function getTabKey(){
+      const a = document.querySelector('.nav-tabs .nav-link.active');
+      const href = a?.getAttribute('href') || '#sa-tab-active';
+      if (href === '#sa-tab-inactive') return 'inactive';
+      if (href === '#sa-tab-trash') return 'trash';
+      return 'active';
+    }
+
+    function getTbody(tabKey){
+      return tabKey==='active' ? tbodyActive : (tabKey==='inactive' ? tbodyInactive : tbodyTrash);
+    }
+
+    function defaultStatusForTab(tabKey){
+      if (tabKey === 'active') return 'published';
+      if (tabKey === 'inactive') return 'draft';
+      return '';
+    }
+
+    function buildUrl(tabKey){
+      const params = new URLSearchParams();
+      params.set('per_page', String(state.perPage));
+      params.set('page', String(state.tabs[tabKey].page));
+      const q = (state.filters.q || '').trim();
+      if (q) params.set('q', q);
+      const s = state.filters.sort || '-created_at';
+      params.set('sort', s.startsWith('-') ? s.slice(1) : s);
+      params.set('direction', s.startsWith('-') ? 'desc' : 'asc');
+      if (tabKey === 'trash'){
+        params.set('only_trashed', '1');
+      } else {
+        const st = (state.filters.status || '').trim() || defaultStatusForTab(tabKey);
+        if (st) params.set('status', st);
+      }
+      if (state.filters.featured !== '') params.set('featured', state.filters.featured);
+      return `/api/student-activities?${params.toString()}`;
+    }
+
+    function setEmpty(tabKey, show){
+      const el = tabKey==='active' ? emptyActive : (tabKey==='inactive' ? emptyInactive : emptyTrash);
+      if (el) el.style.display = show ? '' : 'none';
+    }
+
+    function renderPager(tabKey){
+      const pagerEl = tabKey === 'active' ? pagerActive : (tabKey === 'inactive' ? pagerInactive : pagerTrash);
+      if (!pagerEl) return;
+      const st = state.tabs[tabKey];
+      const page = st.page;
+      const totalPages = st.lastPage || 1;
+      const item = (p, label, dis=false, act=false) => {
+        if (dis) return `<li class="page-item disabled"><span class="page-link">${label}</span></li>`;
+        if (act) return `<li class="page-item active"><span class="page-link">${label}</span></li>`;
+        return `<li class="page-item"><a class="page-link" href="#" data-page="${p}" data-tab="${tabKey}">${label}</a></li>`;
+      };
+      let html = '';
+      html += item(Math.max(1, page-1), 'Previous', page<=1);
+      const start = Math.max(1, page-2), end = Math.min(totalPages, page+2);
+      for (let p=start; p<=end; p++) html += item(p, p, false, p===page);
+      html += item(Math.min(totalPages, page+1), 'Next', page>=totalPages);
+      pagerEl.innerHTML = html;
+    }
+
+    function renderTable(tabKey){
+      const tbody = getTbody(tabKey);
+      const rows = state.tabs[tabKey].items || [];
+      if (!tbody) return;
+      if (!rows.length){
+        tbody.innerHTML = '';
+        setEmpty(tabKey, true);
+        renderPager(tabKey);
+        return;
+      }
+      setEmpty(tabKey, false);
+      tbody.innerHTML = rows.map(r => {
+        const uuid = r.uuid || '';
+        const title = r.title || '—';
+        const slug = r.slug || '—';
+        const dept = r.department_title || '—';
+        const status = (r.status || '').toString();
+        const featured = !!(r.is_featured_home ?? 0);
+        const publishAt = r.publish_at || '—';
+        const updated = r.updated_at || '—';
+        const views = (r.views_count ?? 0);
+        const deleted = r.deleted_at || '—';
+        const deptBadge = `<span class="badge badge-soft-secondary">${esc(dept)}</span>`;
+
+        let actions = `
+        <div class="dropdown">
+          <button type="button" class="btn btn-light btn-sm sa-dd-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa fa-ellipsis-vertical"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><button type="button" class="dropdown-item" onclick="saModule.openModal('view', ${JSON.stringify(r).replace(/"/g, '&quot;')})"><i class="fa fa-eye"></i> View</button></li>
+            <li><button type="button" class="dropdown-item" onclick="saModule.showHistory('student_activities', ${r.id})"><i class="fa fa-clock-rotate-left"></i> Workflow History</button></li>`;
+        
+        if (canEdit && tabKey !== 'trash'){
+          actions += `<li><button type="button" class="dropdown-item" onclick="saModule.openModal('edit', ${JSON.stringify(r).replace(/"/g, '&quot;')})"><i class="fa fa-pen-to-square"></i> Edit</button></li>`;
+        }
+        actions += `</ul></div>`;
+
+        if (tabKey === 'trash'){
+          return `<tr data-uuid="${esc(uuid)}">
+              <td class="fw-semibold">${esc(title)}</td>
+              <td class="col-slug"><code>${esc(slug)}</code></td>
+              <td>${esc(dept)}</td>
+              <td>${esc(String(deleted))}</td>
+              <td class="text-end">${actions}</td>
+            </tr>`;
+        }
+
+        return `<tr data-uuid="${esc(uuid)}">
+          <td class="fw-semibold text-wrap" style="min-width:240px">${esc(title)}</td>
+          <td class="col-slug"><code>${esc(slug)}</code></td>
+          <td>${deptBadge}</td>
+          <td>${statusBadge(status, !!r.draft_data)}</td>
+          <td>${featuredBadge(featured)}</td>
+          <td>${esc(String(publishAt))}</td>
+          <td><span class="badge badge-soft-muted"><i class="fa fa-eye"></i> ${views}</span></td>
+          <td>${workflowBadge(r.workflow_status)}</td>
+          <td>${esc(String(updated))}</td>
+          <td class="text-end">${actions}</td>
+        </tr>`;
+      }).join('');
+      renderPager(tabKey);
+    }
+
+    async function loadTab(tabKey){
+      const tbody = getTbody(tabKey);
+      if (tbody){
+        const cols = tabKey === 'trash' ? 5 : 10;
+        tbody.innerHTML = `<tr><td colspan="${cols}" class="text-center text-muted" style="padding:38px;">Loading…</td></tr>`;
+      }
+      try{
+        const res = await fetchWithTimeout(buildUrl(tabKey), { headers: authHeaders() }, 15000);
+        if (res.status === 401 || res.status === 403) { window.location.href = '/'; return; }
+        const js = await res.json().catch(()=> ({}));
+        if (!res.ok) throw new Error(js?.message || 'Failed to load');
+        const items = Array.isArray(js.data) ? js.data : [];
+        const p = js.pagination || js.meta || {};
+        state.tabs[tabKey].items = items;
+        state.tabs[tabKey].lastPage = parseInt(p.last_page || p.total_pages || 1, 10) || 1;
+        const label = (p.total ? `${p.total} result(s)` : '—');
+        if (tabKey === 'active' && infoActive) infoActive.textContent = label;
+        if (tabKey === 'inactive' && infoInactive) infoInactive.textContent = label;
+        if (tabKey === 'trash' && infoTrash) infoTrash.textContent = label;
+        renderTable(tabKey);
+      }catch(e){
+        state.tabs[tabKey].items = [];
+        state.tabs[tabKey].lastPage = 1;
+        renderTable(tabKey);
+        err(e?.name === 'AbortError' ? 'Request timed out' : (e.message || 'Failed'));
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a.page-link[data-page]');
+      if (!a) return;
+      e.preventDefault();
+      const tab = a.dataset.tab;
+      const p = parseInt(a.dataset.page, 10);
+      if (!tab || Number.isNaN(p)) return;
+      if (p === state.tabs[tab].page) return;
+      state.tabs[tab].page = p;
+      loadTab(tab);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    searchInput?.addEventListener('input', debounce(() => {
+      state.filters.q = (searchInput.value || '').trim();
+      state.tabs.active.page = state.tabs.inactive.page = state.tabs.trash.page = 1;
+      loadTab(getTabKey());
+    }, 320));
+
+    perPageSel?.addEventListener('change', () => {
+      state.perPage = parseInt(perPageSel.value, 10) || 20;
+      state.tabs.active.page = state.tabs.inactive.page = state.tabs.trash.page = 1;
+      loadTab(getTabKey());
+    });
+
+    filterModalEl?.addEventListener('show.bs.modal', () => {
+      if (!modalStatus || !modalSort || !modalFeatured) return;
+      modalStatus.value = state.filters.status || '';
+      modalSort.value = state.filters.sort || '-created_at';
+      modalFeatured.value = (state.filters.featured ?? '');
+    });
+
+    btnApplyFilters?.addEventListener('click', () => {
+      state.filters.status = modalStatus?.value || '';
+      state.filters.sort = modalSort?.value || '-created_at';
+      state.filters.featured = (modalFeatured?.value ?? '');
+      state.tabs.active.page = state.tabs.inactive.page = state.tabs.trash.page = 1;
+      filterModal && filterModal.hide();
+      loadTab(getTabKey());
+    });
+
+    btnReset?.addEventListener('click', () => {
+      state.filters = { q:'', status:'', featured:'', sort:'-created_at' };
+      state.perPage = 20;
+      if (searchInput) searchInput.value = '';
+      if (perPageSel) perPageSel.value = '20';
+      if (modalStatus) modalStatus.value = '';
+      if (modalFeatured) modalFeatured.value = '';
+      if (modalSort) modalSort.value = '-created_at';
+      state.tabs.active.page = state.tabs.inactive.page = state.tabs.trash.page = 1;
+      loadTab(getTabKey());
+    });
+
+    btnAdd?.addEventListener('click', () => openModal('add'));
+
+    document.querySelector('a[href="#sa-tab-active"]')?.addEventListener('shown.bs.tab', () => loadTab('active'));
+    document.querySelector('a[href="#sa-tab-inactive"]')?.addEventListener('shown.bs.tab', () => loadTab('inactive'));
+    document.querySelector('a[href="#sa-tab-trash"]')?.addEventListener('shown.bs.tab', () => loadTab('trash'));
+
+    function enableInputs(on){
+      itemForm?.querySelectorAll('input,select,textarea').forEach(el => {
+        if (el.id === 'saUuid' || el.id === 'saId' || el.id === 'saCoverRemove') return;
+        el.disabled = !on;
+      });
+      setRteEnabled(on);
+    }
+
+    let currentSaForHistory = null;
+    function openModal(mode, r = null){
+      itemForm.reset();
+      $('saUuid').value = '';
+      $('saId').value = '';
+      $('saCoverRemove').value = '0';
+      $('saBodyEditor').innerHTML = '';
+      $('saBodyCode').value = '';
+      $('saBody').value = '';
+      $('saCoverPreview').style.display = 'none';
+      $('saCoverPreview').src = '';
+      $('saCoverEmpty').style.display = 'block';
+      $('saCoverMeta').style.display = 'none';
+      $('saBtnRemoveCover').style.display = 'none';
+      $('saCurrentAttachmentsInfo').style.display = 'none';
+      $('saRejectionAlert').style.display = 'none';
+      $('saDraftAlert').style.display = 'none';
+
+      if (mode === 'add'){
+        itemModalTitle.textContent = 'Add Student Activity';
+        saveBtn.style.display = '';
+        enableInputs(true);
+        loadDepartmentsForForm();
+      } else {
+        itemModalTitle.textContent = mode === 'edit' ? 'Edit Student Activity' : 'View Student Activity';
+        saveBtn.style.display = mode === 'edit' ? '' : 'none';
+        enableInputs(mode === 'edit');
+        if (r){
+          currentSaForHistory = { table: 'student_activities', id: r.id };
+          $('saUuid').value = r.uuid || '';
+          $('saId').value = r.id || '';
+          $('saTitle').value = r.title || '';
+          $('saSlug').value = r.slug || '';
+          $('saStatus').value = r.status || 'draft';
+          $('saFeatured').value = r.is_featured_home ?? 0;
+          $('saPublishAt').value = toLocal(r.publish_at);
+          $('saExpireAt').value = toLocal(r.expire_at);
+          loadDepartmentsForForm(r.department_id);
+          const b = r.body || '';
+          $('saBody').value = b;
+          $('saBodyEditor').innerHTML = b;
+          $('saBodyCode').value = b;
+          if (r.cover_image_url){
+            $('saCoverPreview').src = normalizeUrl(r.cover_image_url);
+            $('saCoverPreview').style.display = 'block';
+            $('saCoverEmpty').style.display = 'none';
+            $('saBtnOpenCover').style.display = '';
+            $('saBtnOpenCover').onclick = () => window.open(normalizeUrl(r.cover_image_url), '_blank');
+            if(mode==='edit') $('saBtnRemoveCover').style.display = '';
+          }
+          if (Array.isArray(r.attachments) && r.attachments.length){
+            $('saCurrentAttachmentsInfo').style.display = 'block';
+            $('saCurrentAttachmentsText').textContent = `${r.attachments.length} file(s) attached`;
+          }
+          if (r.workflow_status === 'rejected') {
+            $('saRejectionAlert').style.display = 'block';
+            $('saRejectionReasonText').textContent = r.rejected_reason || r.rejection_reason || 'No reason provided.';
+          }
+          if (r.draft_data) {
+            $('saDraftAlert').style.display = 'block';
+          }
+        }
+      }
+      itemModal.show();
+    }
+
+    const saHistoryModal = new bootstrap.Modal($('saHistoryModal'));
+    async function showHistory(table, id) {
+      saHistoryModal.show();
+      $('saHistoryLoading').style.display = 'block';
+      $('saHistoryContent').style.display = 'none';
+      $('saHistoryEmpty').style.display = 'none';
+      $('saHistoryTimeline').innerHTML = '';
+      try {
+        const res = await fetchWithTimeout(`/api/master-approval/history/${table}/${id}`, { headers: authHeaders() });
+        const js = await res.json();
+        $('saHistoryLoading').style.display = 'none';
+        if (js.success && js.data && js.data.length) {
+          $('saHistoryTimeline').innerHTML = js.data.map(log => `
+            <li class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <div class="timeline-date">${new Date(log.created_at).toLocaleString()}</div>
+                <div class="timeline-title">
+                  Status changed to <span class="badge ${getStatusClass(log.to_status)}">${log.to_status.replace('_', ' ')}</span>
+                </div>
+                <div class="timeline-author">Action by: ${esc(log.user_name || 'System')} (${esc(log.user_role || 'unknown')})</div>
+                ${log.comment ? `<div class="timeline-comment">${esc(log.comment)}</div>` : ''}
+              </div>
+            </li>
+          `).join('');
+          $('saHistoryContent').style.display = 'block';
+        } else {
+          $('saHistoryEmpty').style.display = 'block';
+        }
+      } catch (err) {
+        $('saHistoryLoading').style.display = 'none';
+        $('saHistoryEmpty').style.display = 'block';
+      }
+    }
+
+    function getStatusClass(s) {
+      s = s.toLowerCase();
+      if (s === 'approved') return 'badge-soft-success text-success';
+      if (s === 'rejected') return 'badge-soft-danger text-danger';
+      if (s === 'checked') return 'badge-soft-info text-info';
+      if (s === 'pending_check') return 'badge-soft-warning text-warning';
+      return 'badge-soft-muted text-muted';
+    }
+
+    window.viewSaHistoryFromAlert = () => {
+      if (currentSaForHistory) {
+        showHistory(currentSaForHistory.table, currentSaForHistory.id);
+      }
+    };
+
+let coverObjectUrl = null;
+
+function syncEditorToCode(){
+  if (!rte.editor || !rte.code || !rte.hidden) return;
+  const html = ensurePreHasCode(rte.editor.innerHTML || '');
+  rte.code.value = html;
+  rte.hidden.value = html;
+}
+
+function syncCodeToEditor(){
+  if (!rte.editor || !rte.code || !rte.hidden) return;
+  const html = ensurePreHasCode(rte.code.value || '');
+  rte.editor.innerHTML = html;
+  rte.hidden.value = html;
+}
+
+function setRteMode(mode = 'text'){
+  rte.mode = mode === 'code' ? 'code' : 'text';
+
+  if (rte.box) {
+    rte.box.classList.toggle('mode-code', rte.mode === 'code');
+  }
+
+  document.querySelectorAll('#saRteBox .rte-modes [data-mode]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === rte.mode);
+  });
+
+  if (rte.mode === 'code') {
+    syncEditorToCode();
+  } else {
+    syncCodeToEditor();
+  }
+}
+
+function rteFocus(){
+  if (rte.mode === 'code' && rte.code) rte.code.focus();
+  else if (rte.editor) rte.editor.focus();
+}
+
+function clearCoverPreview(revoke = false){
+  if (revoke && coverObjectUrl){
+    try { URL.revokeObjectURL(coverObjectUrl); } catch (_) {}
+    coverObjectUrl = null;
+  }
+
+  if (coverPreview){
+    coverPreview.src = '';
+    coverPreview.style.display = 'none';
+  }
+  if (coverEmpty) coverEmpty.style.display = 'block';
+
+  if (coverMeta){
+    coverMeta.textContent = '—';
+    coverMeta.style.display = 'none';
+  }
+
+  if (btnOpenCover){
+    btnOpenCover.style.display = 'none';
+    btnOpenCover.onclick = null;
+  }
+
+  if (btnRemoveCover) btnRemoveCover.style.display = 'none';
+}
+
+function setCoverPreview(url, meta = ''){
+  const src = normalizeUrl(url);
+  if (!src){
+    clearCoverPreview(false);
+    return;
+  }
+
+  if (coverPreview){
+    coverPreview.src = src;
+    coverPreview.style.display = '';
+  }
+  if (coverEmpty) coverEmpty.style.display = 'none';
+
+  if (coverMeta){
+    coverMeta.textContent = meta || '';
+    coverMeta.style.display = meta ? '' : 'none';
+  }
+
+  if (btnOpenCover){
+    btnOpenCover.style.display = '';
+    btnOpenCover.onclick = () => window.open(src, '_blank', 'noopener,noreferrer');
+  }
+}
+
+function setRteEnabled(on){
+  rte.enabled = !!on;
+  if (rte.editor) rte.editor.setAttribute('contenteditable', on ? 'true' : 'false');
+  if (rte.code) rte.code.disabled = !on;
+}
+
+fCover?.addEventListener('change', () => {
+  const f = fCover.files?.[0];
+  if (!f) {
+    clearCoverPreview(true);
+    return;
+  }
+
+  if (fCoverRemove) fCoverRemove.value = '0';
+
+  if (coverObjectUrl){
+    try { URL.revokeObjectURL(coverObjectUrl); } catch (_) {}
+  }
+
+  coverObjectUrl = URL.createObjectURL(f);
+  setCoverPreview(coverObjectUrl, `${f.name || 'cover'} • ${bytes(f.size)}`);
+
+  if (btnRemoveCover) btnRemoveCover.style.display = '';
+});
+
+rte.editor?.addEventListener('input', syncEditorToCode);
+rte.code?.addEventListener('input', syncCodeToEditor);
+
+document.querySelectorAll('#saRteBox .rte-modes [data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    setRteMode(btn.dataset.mode || 'text');
+  });
+});
+
+    btnRemoveCover?.addEventListener('click', () => {
+      // mark remove + clear preview
+      if (fCoverRemove) fCoverRemove.value = '1';
+      if (fCover) fCover.value = '';
+      clearCoverPreview(true);
+      ok('Cover will be removed on save');
+    });
+
+    fAttachments?.addEventListener('change', () => {
+      const files = Array.from(fAttachments.files || []);
+      if (!files.length){
+        if (currentAttachmentsInfo) currentAttachmentsInfo.style.display = 'none';
+        if (currentAttachmentsText) currentAttachmentsText.textContent = '—';
+        return;
+      }
+      if (currentAttachmentsInfo) currentAttachmentsInfo.style.display = '';
+      if (currentAttachmentsText) currentAttachmentsText.textContent = `${files.length} selected`;
+    });
+
+    // =========================
+    // Modal helpers
+    // =========================
+    let saving = false;
+    let slugDirty = false;
+    let settingSlug = false;
+
+    function setBtnLoading(btn, loading){
+      if (!btn) return;
+      btn.disabled = !!loading;
+      btn.classList.toggle('btn-loading', !!loading);
+    }
+
+    function resetForm(){
+  itemForm?.reset();
+  fUuid.value = '';
+  fId.value = '';
+  if (fCoverRemove) fCoverRemove.value = '0';
+
+  // Reset department dropdown
+  if (fDepartmentId){
+    fDepartmentId.innerHTML = `<option value="">Loading departments…</option>`;
+    fDepartmentId.value = '';
+  }
+
+  slugDirty = false;
+  settingSlug = false;
+
+  if (rte.editor) rte.editor.innerHTML = '';
+  if (rte.code) rte.code.value = '';
+  if (rte.hidden) rte.hidden.value = '';
+  setRteMode('text');
+  setRteEnabled(true);
+
+  if (currentAttachmentsInfo) currentAttachmentsInfo.style.display = 'none';
+  if (currentAttachmentsText) currentAttachmentsText.textContent = '—';
+
+  clearCoverPreview(true);
+
+  itemForm?.querySelectorAll('input,select,textarea').forEach(el => {
+    if (el.id === 'saUuid' || el.id === 'saId' || el.id === 'saCoverRemove') return;
+    if (el.type === 'file') el.disabled = false;
+    else if (el.tagName === 'SELECT') el.disabled = false;
+    else el.readOnly = false;
+  });
+
+  if (saveBtn) saveBtn.style.display = '';
+  itemForm.dataset.mode = 'edit';
+  itemForm.dataset.intent = 'create';
+}
+
+    function normalizeAttachments(r){
+      let a = r?.attachments || r?.attachments_json || null;
+      if (typeof a === 'string') { try{ a = JSON.parse(a); }catch(_){ a=null; } }
+      return Array.isArray(a) ? a : [];
+    }
+
+    function fillFormFromRow(r, viewOnly=false){
+  fUuid.value = r.uuid || '';
+  fId.value = r.id || '';
+  if (fCoverRemove) fCoverRemove.value = '0';
+
+  fTitle.value = r.title || '';
+  fSlug.value = r.slug || '';
+
+  // Set department value (will be applied when dropdown loads)
+  const deptId = r.department_id || r?.department?.id || r?.departmentId || '';
+  
+  fStatus.value = (r.status || 'draft');
+  fFeatured.value = String((r.is_featured_home ?? 0) ? 1 : 0);
+
+  fPublishAt.value = toLocal(r.publish_at);
+  fExpireAt.value = toLocal(r.expire_at);
+
+  const bodyHtml = (r.body ?? '') || '';
+  if (rte.editor) rte.editor.innerHTML = ensurePreHasCode(bodyHtml);
+  syncEditorToCode();
+  setRteMode('text');
+
+  const coverUrl = r.cover_image_url || r.cover_image || '';
+  if (coverUrl){
+    clearCoverPreview(true);
+    setCoverPreview(coverUrl, '');
+    if (btnRemoveCover) btnRemoveCover.style.display = viewOnly ? 'none' : '';
+  } else {
+    clearCoverPreview(true);
+  }
+
+  const atts = normalizeAttachments(r);
+  if (atts.length){
+    if (currentAttachmentsInfo) currentAttachmentsInfo.style.display = '';
+    if (currentAttachmentsText) currentAttachmentsText.textContent = `${atts.length} file(s) attached`;
+  } else {
+    if (currentAttachmentsInfo) currentAttachmentsInfo.style.display = 'none';
+    if (currentAttachmentsText) currentAttachmentsText.textContent = '—';
+  }
+
+  slugDirty = true;
+
+  // Load departments and set the selected one
+  loadDepartments(deptId);
+
+  // Update publish option visibility
+  if (!viewOnly) {
+    setTimeout(() => updatePublishOption(), 50);
+  }
+
+  if (viewOnly){
+    itemForm?.querySelectorAll('input,select,textarea').forEach(el => {
+      if (el.id === 'saUuid' || el.id === 'saId' || el.id === 'saCoverRemove') return;
+      if (el.type === 'file') el.disabled = true;
+      else if (el.tagName === 'SELECT') el.disabled = true;
+      else el.readOnly = true;
+    });
+    setRteEnabled(false);
+    if (saveBtn) saveBtn.style.display = 'none';
+    if (btnRemoveCover) btnRemoveCover.style.display = 'none';
+    itemForm.dataset.mode = 'view';
+    itemForm.dataset.intent = 'view';
+  } else {
+    setRteEnabled(true);
+    if (saveBtn) saveBtn.style.display = '';
+    itemForm.dataset.mode = 'edit';
+    itemForm.dataset.intent = 'edit';
+  }
+}
+    fTitle?.addEventListener('input', debounce(() => {
+      if (itemForm?.dataset.mode === 'view') return;
+      if (fUuid.value) return;
+      if (slugDirty) return;
+      const next = slugify(fTitle.value);
+      settingSlug = true;
+      fSlug.value = next;
+      settingSlug = false;
+    }, 120));
+
+    fSlug?.addEventListener('input', () => {
+      if (fUuid.value) return;
+      if (settingSlug) return;
+      slugDirty = !!(fSlug.value || '').trim();
+    });
+
+    btnAdd?.addEventListener('click', async () => {
+      if (!canCreate) return;
+      resetForm();
+
+      // ✅ ensure departments are loaded before opening (added)
+      await loadDepartmentsForForm();
+
+      if (itemModalTitle) itemModalTitle.textContent = 'Add Student Activity';
+      itemForm.dataset.intent = 'create';
+      itemModal && itemModal.show();
+    });
+
+    itemModalEl?.addEventListener('hidden.bs.modal', () => {
+      if (coverObjectUrl){ try{ URL.revokeObjectURL(coverObjectUrl); }catch(_){ } coverObjectUrl=null; }
+    });
+
+    // =========================
+    // Row actions
+    // =========================
+    async function updateStatus(uuid, status){
+      showLoading(true);
+      try{
+        const fd = new FormData();
+        fd.append('_method', 'PUT');
+        fd.append('status', status);
+
+        const res = await fetchWithTimeout(`/api/student-activities/${encodeURIComponent(uuid)}`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: fd
+        }, 15000);
+
+        const js = await res.json().catch(()=> ({}));
+        if (!res.ok || js.success === false) throw new Error(js?.message || 'Update failed');
+
+        ok('Status updated');
+        await Promise.all([loadTab('active'), loadTab('inactive')]);
+      }catch(ex){
+        err(ex?.name === 'AbortError' ? 'Request timed out' : (ex.message || 'Failed'));
+      }finally{
+        showLoading(false);
+      }
+    }
+
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+
+      const tr = btn.closest('tr');
+      const uuid = tr?.dataset?.uuid;
+      const act = btn.dataset.action;
+      if (!uuid) return;
+
+      // close dropdown (bootstrap)
+      const toggle = btn.closest('.dropdown')?.querySelector('.sa-dd-toggle');
+      if (toggle) { try { bootstrap.Dropdown.getOrCreateInstance(toggle).hide(); } catch (_) {} }
+
+      const row = findRowByUuid(uuid) || {};
+
+      if (act === 'view'){
+        const slug = row.slug || row.uuid || row.id;
+        if (slug) window.open(`/student-activities/view/${slug}`, '_blank');
+        return;
+      }
+
+      if (act === 'edit'){
+        if (!canEdit) return;
+
+        // ✅ ensure departments are loaded before filling (added)
+        await loadDepartmentsForForm();
+
+        resetForm();
+        if (itemModalTitle) itemModalTitle.textContent = 'Edit Student Activity';
+        fillFormFromRow(row, false);
+        itemModal && itemModal.show();
+        return;
+      }
+
+      if (act === 'toggleFeatured'){
+        if (!canEdit) return;
+        showLoading(true);
+        try{
+          const res = await fetchWithTimeout(`/api/student-activities/${encodeURIComponent(uuid)}/toggle-featured`, {
+            method: 'POST',
+            headers: authHeaders()
+          }, 15000);
+
+          const js = await res.json().catch(()=> ({}));
+          if (!res.ok || js.success === false) throw new Error(js?.message || 'Toggle failed');
+
+          ok('Featured updated');
+          await Promise.all([loadTab('active'), loadTab('inactive')]);
+        }catch(ex){
+          err(ex?.name === 'AbortError' ? 'Request timed out' : (ex.message || 'Failed'));
+        }finally{
+          showLoading(false);
+        }
+        return;
+      }
+
+      if (act === 'markPublished'){ if (!canEdit) return; await updateStatus(uuid, 'published'); return; }
+      if (act === 'markDraft'){ if (!canEdit) return; await updateStatus(uuid, 'draft'); return; }
+if (act === 'make-publish'){
+  if (!canPublish) return;
+  
+  const conf = await Swal.fire({
+    title: 'Publish this student activity?',
+    text: 'This will make the student activity visible to the public.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Publish',
+    confirmButtonColor: '#10b981'
+  });
+  if (!conf.isConfirmed) return;
+
+  showLoading(true);
+  try{
+    const fd = new FormData();
+    fd.append('status', 'published');
+    fd.append('_method', 'PUT');
+
+    const res = await fetchWithTimeout(`/api/student-activities/${encodeURIComponent(uuid)}`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: fd
+    }, 15000);
+
+    const js = await res.json().catch(()=> ({}));
+    if (!res.ok || js.success === false) throw new Error(js?.message || 'Publish failed');
+
+    ok('Student activity published successfully');
+    await Promise.all([loadTab('active'), loadTab('inactive'), loadTab('trash')]);
+  }catch(ex){
+    err(ex?.name === 'AbortError' ? 'Request timed out' : (ex.message || 'Failed'));
+  }finally{
+    showLoading(false);
+  }
+  return;
+}
+
+if (act === 'mark-draft'){
+  if (!canPublish) return;
+  
+  const conf = await Swal.fire({
+    title: 'Mark as Draft?',
+    text: 'This will hide the student activity from the public.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Mark as Draft',
+    confirmButtonColor: '#f59e0b'
+  });
+  if (!conf.isConfirmed) return;
+
+  showLoading(true);
+  try{
+    const fd = new FormData();
+    fd.append('status', 'draft');
+    fd.append('_method', 'PUT');
+
+    const res = await fetchWithTimeout(`/api/student-activities/${encodeURIComponent(uuid)}`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: fd
+    }, 15000);
+
+    const js = await res.json().catch(()=> ({}));
+    if (!res.ok || js.success === false) throw new Error(js?.message || 'Update failed');
+
+    ok('Marked as draft');
+    await Promise.all([loadTab('active'), loadTab('inactive'), loadTab('trash')]);
+  }catch(ex){
+    err(ex?.name === 'AbortError' ? 'Request timed out' : (ex.message || 'Failed'));
+  }finally{
+    showLoading(false);
+  }
+  return;
+}
+      if (act === 'delete'){
+        if (!canDelete) return;
+        const conf = await Swal.fire({
+          title: 'Delete this student activity?',
+          text: 'This will move the item to Trash.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Delete',
+          confirmButtonColor: '#ef4444'
+        });
+        if (!conf.isConfirmed) return;
+
+        showLoading(true);
+        try{
+          const res = await fetchWithTimeout(`/api/student-activities/${encodeURIComponent(uuid)}`, {
+            method: 'DELETE',
+            headers: authHeaders()
+          }, 15000);
+
+          const js = await res.json().catch(()=> ({}));
+          if (!res.ok || js.success === false) throw new Error(js?.message || 'Delete failed');
+
+          ok('Moved to trash');
+          await Promise.all([loadTab('active'), loadTab('inactive'), loadTab('trash')]);
+        }catch(ex){
+          err(ex?.name === 'AbortError' ? 'Request timed out' : (ex.message || 'Failed'));
+        }finally{
+          showLoading(false);
+        }
+        return;
+      }
+
+      if (act === 'restore'){
+        const conf = await Swal.fire({
+          title: 'Restore this item?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Restore'
+        });
+        if (!conf.isConfirmed) return;
+
+        showLoading(true);
+        try{
+          const res = await fetchWithTimeout(`/api/student-activities/${encodeURIComponent(uuid)}/restore`, {
+            method: 'POST',
+            headers: authHeaders()
+          }, 15000);
+
+          const js = await res.json().catch(()=> ({}));
+          if (!res.ok || js.success === false) throw new Error(js?.message || 'Restore failed');
+
+          ok('Restored');
+          await Promise.all([loadTab('trash'), loadTab('active'), loadTab('inactive')]);
+        }catch(ex){
+          err(ex?.name === 'AbortError' ? 'Request timed out' : (ex.message || 'Failed'));
+        }finally{
+          showLoading(false);
+        }
+        return;
+      }
+
+      if (act === 'force'){
+        if (!canDelete) return;
+        const conf = await Swal.fire({
+          title: 'Delete permanently?',
+          text: 'This cannot be undone (files will be removed).',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Delete Permanently',
+          confirmButtonColor: '#ef4444'
+        });
+        if (!conf.isConfirmed) return;
+
+        showLoading(true);
+        try{
+          const res = await fetchWithTimeout(`/api/student-activities/${encodeURIComponent(uuid)}/force`, {
+            method: 'DELETE',
+            headers: authHeaders()
+          }, 15000);
+
+          const js = await res.json().catch(()=> ({}));
+          if (!res.ok || js.success === false) throw new Error(js?.message || 'Force delete failed');
+
+          ok('Deleted permanently');
+          await loadTab('trash');
+        }catch(ex){
+          err(ex?.name === 'AbortError' ? 'Request timed out' : (ex.message || 'Failed'));
+        }finally{
+          showLoading(false);
+        }
+        return;
+      }
+    });
+
+// =========================
+// Submit (create/edit)
+// =========================
+itemForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  if (saving) return;
+  saving = true;
+
+  try{
+    if (itemForm.dataset.mode === 'view') return;
+
+    const intent = itemForm.dataset.intent || 'create';
+    const isEdit = intent === 'edit' && !!fUuid.value;
+
+    if (isEdit && !canEdit) return;
+    if (!isEdit && !canCreate) return;
+
+    const title = (fTitle.value || '').trim();
+    const slug  = (fSlug.value || '').trim();
+
+    // ✅ department id
+    const deptId = (fDepartmentId?.value || '').toString().trim();
+
+    const status   = (fStatus.value || 'draft').trim();
+    const featured = (fFeatured.value || '0').trim();
+
+    const rawBody  = (rte.mode === 'code') ? (rte.code.value || '') : (rte.editor.innerHTML || '');
+    const cleanBody = ensurePreHasCode(rawBody).trim();
+    if (rte.hidden) rte.hidden.value = cleanBody;
+
+    if (!title){ err('Title is required'); fTitle.focus(); return; }
+    if (!cleanBody){ err('Body is required'); rteFocus(); return; }
+
+    // ✅ fd MUST be created BEFORE appending
+    const fd = new FormData();
+
+    fd.append('title', title);
+    if (slug) fd.append('slug', slug);
+
+    // ✅ send department only if selected
+    // - if edit and user cleared it -> send empty to clear on backend
+    if (deptId) {
+      fd.append('department_id', deptId);
+    } else if (isEdit) {
+      fd.append('department_id', '');
+    }
+
+    fd.append('status', status);
+    fd.append('is_featured_home', featured === '1' ? '1' : '0');
+
+    if ((fPublishAt.value || '').trim()) fd.append('publish_at', fPublishAt.value);
+    if ((fExpireAt.value || '').trim())  fd.append('expire_at', fExpireAt.value);
+
+    fd.append('body', cleanBody);
+
+    // cover remove
+    if (isEdit && (fCoverRemove?.value === '1')) fd.append('cover_image_remove', '1');
+
+    // cover upload
+    const cover = fCover.files?.[0] || null;
+    if (cover) fd.append('cover_image', cover);
+
+    // attachments upload
+    Array.from(fAttachments.files || []).forEach(f => fd.append('attachments[]', f));
+
+    let url = '/api/student-activities';
+    if (isEdit){
+      url = `/api/student-activities/${encodeURIComponent(fUuid.value)}`;
+      fd.append('_method', 'PUT');
+    }
+
+    setBtnLoading(saveBtn, true);
+    showLoading(true);
+
+    const res = await fetchWithTimeout(url, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: fd
+    }, 20000);
+
+    const js = await res.json().catch(()=> ({}));
+    if (!res.ok || js.success === false){
+      let msg = js?.message || 'Save failed';
+      if (js?.errors){
+        const k = Object.keys(js.errors)[0];
+        if (k && js.errors[k] && js.errors[k][0]) msg = js.errors[k][0];
+      }
+      throw new Error(msg);
+    }
+
+    ok(isEdit ? 'Updated' : 'Created');
+    itemModal && itemModal.hide();
+
+    state.tabs.active.page = state.tabs.inactive.page = state.tabs.trash.page = 1;
+    await Promise.all([loadTab('active'), loadTab('inactive'), loadTab('trash')]);
+
+  }catch(ex){
+    err(ex?.name === 'AbortError' ? 'Request timed out' : (ex.message || 'Failed'));
+  }finally{
+    saving = false;
+    setBtnLoading(saveBtn, false);
+    showLoading(false);
+  }
+});
+
+
+    // Init
+    (async () => {
+      showLoading(true);
+      try{
+        await fetchMe();
+
+        // ✅ preload departments once (added)
+        await loadDepartmentsForForm();
+
+        await Promise.all([loadTab('active'), loadTab('inactive'), loadTab('trash')]);
+      }catch(ex){
+        console.error('Student Activities Init Error:', ex);
+        err(ex?.message || 'Initialization failed');
+      }finally{
+        showLoading(false);
+      }
+    })();
+  });
+})();
+</script>
+@endpush
