@@ -1,0 +1,2054 @@
+/* ============================================================
+   home.css — LegMed Foundation Homepage
+   Uses main.css variables where applicable
+   ============================================================ */
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after {
+     box-sizing: border-box;
+     margin: 0;
+     padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: #1a1a1a;
+    background: #fff;
+    overflow-x: hidden;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+
+/* ============================================================
+   SIDEBAR RIBBON
+   ============================================================ */
+.sidebar-ribbon {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9999;
+    background: #1a2b4a;
+    width: 32px;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+
+.sidebar-ribbon span {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    color: #FFD700;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Top tier */
+.header-top {
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 48px 10px 48px;
+    min-height: 75px;
+}
+
+.brand-name {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: #A30000;
+    line-height: 1.2;
+}
+
+.brand-tagline {
+    font-size: 14px;
+    color: #1a1a1a;
+    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* LM Logo */
+/* Logo Size Fix */
+.header-logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo-image {
+    width: 110px;           /* Adjusted size - looks balanced */
+    height: auto;
+    max-height: 85px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* Optional: Make logo slightly larger on hover */
+.logo-image:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+/* Make Donate button stand out */
+.donate-pill {
+    background: #FFD700 !important;
+    color: #A30000 !important;
+    font-weight: 900 !important;
+}
+
+/* Navigation bar */
+.header-nav {
+    background: #A30000;
+    padding: 10px 0;
+    width: 100%;
+}
+
+.nav-list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 0 20px;
+}
+
+.nav-pill {
+    display: inline-block;
+    background: #FFD700;
+    color: #A30000;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    transition: background 0.18s ease, color 0.18s ease;
+    white-space: nowrap;
+}
+
+.nav-pill:hover,
+.nav-list li .nav-pill.active {
+    background: #e6c200;
+    color: #7a0000;
+}
+
+.nav-arrow {
+    font-size: 9px;
+    margin-left: 3px;
+}
+
+/* Dropdown */
+.has-dropdown {
+    position: relative;
+}
+
+.has-dropdown .dropdown-nav {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    min-width: 180px;
+    z-index: 2000;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 6px 0;
+}
+
+.has-dropdown:hover .dropdown-nav {
+    display: block;
+}
+
+.dropdown-nav li a {
+    display: block;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: #f5f0f0;
+    background-color: #A30000;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+}
+
+.dropdown-nav li a:hover {
+    background: #f5f0f0;
+    color: #A30000;
+}
+
+/* ============================================================
+   SECTION 2: HERO
+   ============================================================ */
+.hero-section {
+    padding: 40px 48px 20px 64px;
+    background: #fff;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 40% 30% 30%;
+    gap: 0;
+    align-items: start;
+}
+
+/* Left */
+.hero-left {
+    padding-right: 30px;
+    padding-top: 20px;
+}
+
+.hero-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 52px;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.1;
+    margin-bottom: 28px;
+}
+
+.hero-body {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 40px;
+}
+
+.hero-body strong {
+    color: #1a1a1a;
+}
+
+.show-more-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #A30000;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #A30000;
+    padding-bottom: 2px;
+    text-decoration: none;
+    margin-top: 10px;
+}
+
+.show-more-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #A30000;
+    border-radius: 50%;
+    font-size: 13px;
+    color: #A30000;
+}
+
+/* Middle */
+.hero-middle {
+    padding: 0 8px;
+}
+
+.hero-portrait-bw {
+    width: 100%;
+    height: 490px;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+}
+
+/* Right */
+.hero-right {
+    padding-left: 0;
+}
+
+.hero-portrait-color {
+    width: 350px;
+    height: 450px;
+    object-fit: cover; 
+}
+
+.sacred-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    padding: 16px 18px;
+    margin-top: 0;
+}
+
+.sacred-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.sacred-text {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+/* ============================================================
+   SECTION 3: PARALLAX CAROUSEL
+   ============================================================ */
+.parallax-section {
+    position: relative;
+    background-image: url('https://images.unsplash.com/photo-1504813184591-01572f98c85f?w=1600&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: 60px 40px 60px;
+    text-align: center;
+    min-height: 650px;
+}
+
+.parallax-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(120, 20, 20, 0.72);
+    z-index: 0;
+}
+
+.parallax-content {
+    position: relative;
+    z-index: 1;
+}
+
+.parallax-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.parallax-subtext {
+    font-size: 16px;
+    color: rgba(255,255,255,0.92);
+    max-width: 660px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+}
+
+.parallax-subtext strong {
+    color: #fff;
+}
+
+/* Carousel */
+.carousel-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.carousel-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 44px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 8px;
+    transition: opacity 0.2s;
+    z-index: 2;
+}
+
+.carousel-btn:hover {
+    opacity: 0.75;
+}
+
+.carousel-track-outer {
+    overflow: hidden;
+    width: 860px;
+}
+
+.carousel-slide {
+    flex: 0 0 calc((100% - 32px) / 3);
+}
+
+.carousel-slide img {
+    width: 270px;
+    height: 270px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.75);
+}
+
+.carousel-track {
+    display: flex;
+    gap: 16px;
+    transition: transform 0.4s ease;
+}
+
+.carousel-slide {
+    flex-shrink: 0;
+}
+
+.carousel-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+
+.dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.45);
+    display: inline-block;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.dot.active {
+    background: #fff;
+}
+
+.read-more-btn {
+    display: inline-block;
+    background: #C0392B;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    padding: 14px 48px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.read-more-btn:hover {
+    background: #a93226;
+}
+
+/* ============================================================
+   SECTION 4: TESTIMONIAL & MISSION GRID
+   ============================================================ */
+.testimonial-section {
+    background: #fff;
+    padding: 50px 64px 40px;
+}
+
+.quote-block {
+    display: flex;
+    align-items: flex-start;
+    gap: 36px;
+    margin-bottom: 40px;
+}
+
+.quote-avatar img {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    object-fit: cover;
+    filter: grayscale(100%);
+    border: 3px solid #e0e0e0;
+}
+
+.quote-content {
+    flex: 1;
+    position: relative;
+}
+
+.quote-marks {
+    font-family: Georgia, serif;
+    font-size: 80px;
+    color: #e8d5c5;
+    line-height: 0.6;
+    margin-bottom: 16px;
+    letter-spacing: -5px;
+}
+
+.quote-text {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: #111;
+    line-height: 1.4;
+    margin-bottom: 14px;
+    font-style: normal;
+}
+
+.quote-author {
+    font-size: 15px;
+    font-style: italic;
+    color: #555;
+    font-weight: 600;
+}
+
+/* Mission grid - 4 cols, first col text, last 3 media */
+.mission-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    border: 1px solid #d0d0d0;
+    overflow: hidden;
+}
+
+.mission-col {
+    border-right: 1px solid #d0d0d0;
+}
+
+.mission-col:last-child {
+    border-right: none;
+}
+
+.mission-text-col {
+    padding: 30px 26px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.mission-text-col p {
+    font-size: 13.5px;
+    color: #555;
+    line-height: 1.75;
+}
+
+.mission-text-col strong {
+    color: #1a1a1a;
+}
+
+.mission-media-col img {
+    width: 100%;
+    height: 250px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Video */
+.video-thumb {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    background: #111;
+    overflow: hidden;
+}
+
+.video-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.7;
+}
+
+.play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #333;
+    cursor: pointer;
+}
+
+.video-controls {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+    color: #fff;
+    font-size: 14px;
+}
+
+/* ============================================================
+   SECTION 5A: EYE SCREENING
+   ============================================================ */
+.service-block {
+    padding: 30px 48px 24px;
+    background: #fff;
+}
+
+.eye-screening-block {
+    border: 1px solid #ccc;
+    margin: 20px 48px;
+    padding: 28px 32px;
+}
+
+.service-heading {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    text-decoration: underline;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.eye-heading {
+    color: #A30000;
+}
+
+.eye-gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.eye-img img {
+    width: 100%;
+    height: 270px;
+    object-fit: cover;
+    display: block;
+}
+
+.service-helpline {
+    text-align: center;
+    font-size: 15px;
+    color: #1a1a1a;
+    margin-top: 10px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ============================================================
+   SECTION 5B: CANTEEN SERVICES
+   ============================================================ */
+.canteen-block {
+    border: 1px solid #ccc;
+    margin: 0 48px 28px;
+    padding: 0;
+}
+
+.canteen-grid {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    min-height: 300px;
+}
+
+.canteen-left {
+    padding: 28px 28px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.canteen-gallery {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.canteen-gallery img {
+    flex: 1;
+    height: 200px;
+    object-fit: contain;
+}
+
+.canteen-divider {
+    background: #ccc;
+    width: 1px;
+    align-self: stretch;
+}
+
+.canteen-right {
+    padding: 32px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.canteen-heading {
+    color: #A30000;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.canteen-text {
+    font-size: 14px;
+    color: #1a1a1a;
+    line-height: 1.8;
+    text-align: justify;
+}
+
+.canteen-text strong {
+    color: #1a1a1a;
+}
+
+/* ============================================================
+   SECTION 6A: INITIATIVES
+   ============================================================ */
+.initiatives-section {
+    background: #f5f3ef;
+    padding: 60px 48px;
+    text-align: center;
+}
+
+.initiatives-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 40px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 12px;
+}
+
+.initiatives-divider {
+    width: 60px;
+    height: 3px;
+    background: #A30000;
+    margin: 0 auto 24px;
+    border-radius: 2px;
+}
+
+.initiatives-subtext {
+    font-size: 15px;
+    color: #555;
+    max-width: 800px;
+    margin: 0 auto 48px;
+    line-height: 1.75;
+}
+
+.initiatives-icons {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
+}
+
+.initiative-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    max-width: 130px;
+}
+
+.initiative-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #A30000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    transition: background 0.2s;
+}
+
+.initiative-circle:hover {
+    background: rgba(163,0,0,0.06);
+}
+
+.initiative-label {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-align: center;
+    text-decoration: underline;
+    line-height: 1.4;
+}
+
+.view-details-btn {
+    display: inline-block;
+    background: #C0392B;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    padding: 14px 48px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.view-details-btn:hover {
+    background: #a93226;
+}
+
+/* ============================================================
+   SECTION 6B: TEAM
+   ============================================================ */
+.team-section {
+    background: #fff;
+    padding: 60px 48px 60px;
+}
+
+.team-intro {
+    display: grid;
+    grid-template-columns: 35% 65%;
+    gap: 48px;
+    margin-bottom: 40px;
+    align-items: start;
+}
+
+.team-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 40px;
+    font-weight: 400;
+    color: #111;
+}
+
+.team-body {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.75;
+}
+
+.team-body strong {
+    color: #1a1a1a;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.team-card {
+    position: relative;
+    overflow: visible;
+}
+
+.team-photo img {
+    width: 100%;
+    height: 340px;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+}
+
+.team-label {
+    background: #A30000;
+    padding: 14px 16px;
+    margin-top: -10px;
+    margin-left: -8px;
+    position: relative;
+    z-index: 2;
+    min-height: 80px;
+}
+
+.team-name {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 4px;
+}
+
+.team-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.4;
+}
+
+/* ============================================================
+   SECTION 7: SOCIAL
+   ============================================================ */
+.social-section {
+    background: #f5f3ef;
+    padding: 48px 40px;
+    text-align: center;
+}
+
+.social-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 12px;
+}
+
+.social-divider {
+    width: 60px;
+    height: 2px;
+    background: #b8a090;
+    margin: 0 auto 28px;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #A30000;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.social-btn:hover {
+    background: #7a0000;
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   MAIN FOOTER
+   ============================================================ */
+.main-footer {
+    background: #A30000;
+    color: #fff;
+}
+
+.footer-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 32px;
+    padding: 48px 64px 40px;
+}
+
+.footer-heading {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #FFD700;
+    margin-bottom: 18px;
+}
+
+.footer-heading-white {
+    color: #fff;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.footer-links li {
+    margin-bottom: 8px;
+}
+
+.footer-links li a {
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.88);
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    transition: color 0.15s;
+}
+
+.footer-links li a:hover {
+    color: #FFD700;
+}
+
+.footer-social {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.footer-social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.15s;
+}
+
+.footer-social a:hover {
+    background: rgba(255,255,255,0.28);
+}
+
+
+.footer-gallery {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.footer-gallery-img img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.footer-bottom {
+    background: #7a0000;
+    text-align: center;
+    padding: 14px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.88);
+    font-family: 'Inter', sans-serif;
+}
+
+/* ============================================================
+   RESPONSIVE — Full multi-device coverage
+   Breakpoints:
+     1400px  Large desktop / wide laptop
+     1200px  Standard laptop / small desktop
+     1024px  Landscape tablet / small laptop
+      768px  Portrait tablet
+      600px  Large mobile / phablet
+      480px  Standard mobile
+      360px  Small / budget mobile
+   ============================================================ */
+
+@media (max-width: 1400px) {
+    .hero-section          { padding: 40px 40px 20px 56px; }
+    .hero-heading          { font-size: 48px; }
+    .footer-inner          { padding: 40px 48px 36px; }
+    .testimonial-section   { padding: 50px 48px 40px; }
+}
+
+/* ----------------------------------------------------------
+   1200px — Standard laptop
+   ---------------------------------------------------------- */
+@media (max-width: 1200px) {
+    /* Header */
+    .header-top            { padding: 10px 32px; }
+    .brand-name            { font-size: 19px; }
+
+    /* Nav */
+    .nav-pill              { font-size: 12px; padding: 6px 13px; }
+
+    /* Hero */
+    .hero-section          { padding: 32px 32px 16px 48px; }
+    .hero-grid             { grid-template-columns: 40% 30% 30%; }
+    .hero-heading          { font-size: 42px; }
+
+    /* Carousel */
+    .carousel-track-outer  { width: 780px; }
+    .carousel-slide img    { width: 240px; height: 340px; }
+
+    /* Testimonial */
+    .testimonial-section   { padding: 44px 36px 36px; }
+    .quote-text            { font-size: 24px; }
+
+    /* Service blocks */
+    .eye-screening-block   { margin: 20px 32px; }
+    .canteen-block         { margin: 0 32px 24px; }
+
+    /* Initiatives */
+    .initiatives-heading   { font-size: 34px; }
+    .initiatives-icons     { gap: 36px; }
+
+    /* Team */
+    .team-section          { padding: 48px 32px; }
+    .team-heading          { font-size: 34px; }
+
+    /* Footer */
+    .footer-inner          { padding: 40px 36px 32px; gap: 24px; }
+}
+
+/* ----------------------------------------------------------
+   1024px — Landscape tablet / small laptop
+   ---------------------------------------------------------- */
+@media (max-width: 1024px) {
+    /* Sidebar */
+    .sidebar-ribbon        { width: 28px; height: 190px; }
+    .sidebar-ribbon span   { font-size: 10px; }
+
+    /* Header */
+    .header-top            { padding: 10px 24px; min-height: 65px; }
+    .brand-name            { font-size: 17px; }
+    .brand-tagline         { font-size: 13px; }
+    .lm-logo               { padding: 8px 10px; min-width: 78px; }
+    .logo-lm               { font-size: 24px; }
+
+    /* Nav — allow 2 rows */
+    .nav-pill              { font-size: 11.5px; padding: 6px 11px; }
+    .nav-list              { gap: 7px; padding: 0 12px; }
+
+    /* Hero — collapse middle column, show left + right stacked on right */
+    .hero-section          { padding: 28px 24px 16px 40px; }
+    .hero-grid             { grid-template-columns: 44% 56%; }
+    .hero-middle           { display: none; }
+    .hero-heading          { font-size: 36px; }
+    .hero-body             { font-size: 13.5px; }
+
+    /* Parallax */
+    .parallax-heading      { font-size: 38px; }
+    .parallax-subtext      { font-size: 14px; }
+    .carousel-track-outer  { width: 680px; max-width: 75vw; }
+    .carousel-slide img    { width: 210px; height: 300px; }
+
+    /* Testimonial */
+    .testimonial-section   { padding: 36px 24px 32px; }
+    .quote-text            { font-size: 21px; }
+    .mission-grid          { grid-template-columns: 1fr 1fr; }
+
+    /* Eye screening */
+    .eye-gallery           { grid-template-columns: repeat(2, 1fr); }
+    .eye-img img           { height: 220px; }
+    .eye-screening-block   { margin: 16px 24px; padding: 22px 22px; }
+
+    /* Canteen */
+    .canteen-block         { margin: 0 24px 20px; }
+    .canteen-gallery img   { height: 160px; }
+
+    /* Initiatives */
+    .initiatives-section   { padding: 48px 24px; }
+    .initiatives-heading   { font-size: 30px; }
+    .initiatives-subtext   { font-size: 14px; }
+    .initiatives-icons     { gap: 28px; }
+    .initiative-circle     { width: 70px; height: 70px; }
+
+    /* Team */
+    .team-section          { padding: 40px 24px; }
+    .team-intro            { grid-template-columns: 40% 60%; gap: 32px; }
+    .team-heading          { font-size: 30px; }
+    .team-grid             { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .team-photo img        { height: 300px; }
+
+    /* Footer */
+    .footer-inner          { grid-template-columns: 1fr 1fr; gap: 24px; padding: 36px 28px 28px; }
+    .footer-gallery-img img { height: 88px; }
+}
+
+/* ----------------------------------------------------------
+   768px — Portrait tablet
+   ---------------------------------------------------------- */
+@media (max-width: 768px) {
+    
+    /* Header */
+    .header-top            { padding: 10px 16px; min-height: 60px; }
+    .brand-name            { font-size: 16px; }
+    .brand-tagline         { font-size: 12px; }
+    .sidebar-ribbon {
+        display:flex;
+        width:22px;
+        height:180px;
+    }
+
+    /* Mobile nav toggle */
+    .nav-hamburger         { display: flex; }
+    .nav-list              { flex-direction: column; align-items: flex-start; gap: 4px;
+                             padding: 10px 16px; display: none; }
+    .nav-list.nav-open     { display: flex; }
+    .nav-pill              { font-size: 13px; padding: 8px 16px; border-radius: 999px;
+                             width: 100%; text-align: center; }
+
+    /* Hero */
+    .hero-section          { padding: 24px 16px 20px 16px; }
+    .hero-grid             { grid-template-columns: 1fr; gap: 24px; }
+    .hero-middle           { display: block; }
+    .hero-portrait-bw      { height: 374px; width: 400px; object-fit: contain; }
+    .hero-portrait-color   { height: 374px; width: 400px; object-fit:contain;}
+    .hero-heading          { font-size: 32px; margin-bottom: 18px; }
+    .hero-body             { font-size: 13.5px; margin-bottom: 24px; }
+    .hero-left             { padding-right: 0; }
+
+    /* Parallax */
+    .parallax-section      { background-attachment: scroll; padding: 44px 16px 44px; min-height: auto; }
+    .parallax-heading      { font-size: 30px; }
+    .parallax-subtext      { font-size: 13.5px; max-width: 100%; }
+    .carousel-track-outer  { width: 560px; max-width: 85vw; }
+    .carousel-slide img    { width: 170px; height: 260px; }
+    .read-more-btn         { padding: 12px 36px; font-size: 13px; }
+
+    /* Testimonial */
+    .testimonial-section   { padding: 28px 16px 24px; }
+    .quote-block           { flex-direction: column; gap: 20px; align-items: flex-start; }
+    .quote-avatar img      { width: 200px; height: 200px; }
+    .quote-text            { font-size: 18px; }
+    .quote-marks           { font-size: 64px; }
+    .mission-grid          { grid-template-columns: 1fr 1fr; }
+    .mission-text-col      { grid-column: 1 / -1; padding: 22px 18px; }
+
+    /* Eye screening */
+    .eye-screening-block   { margin: 14px 16px; padding: 20px 16px; }
+    .eye-gallery           { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .eye-img img           { height: 190px; }
+    .service-helpline      { font-size: 13.5px; }
+
+    /* Canteen */
+    .canteen-block         { margin: 0 16px 20px; }
+    .canteen-grid          { grid-template-columns: 1fr; }
+    .canteen-divider       { display: none; }
+    .canteen-left          { padding: 20px 16px; object-fit: contain; }
+    .canteen-right         { padding: 20px 16px; border-top: 1px solid #ccc; }
+    .canteen-gallery img   { height: 100%; width: 100%; object-fit: contain; }
+    .canteen-heading       { font-size: 18px; }
+    .canteen-text          { font-size: 13.5px; }
+
+    /* Initiatives */
+    .initiatives-section   { padding: 40px 16px; }
+    .initiatives-heading   { font-size: 26px; }
+    .initiatives-subtext   { font-size: 13.5px; }
+    .initiatives-icons     { gap: 20px; }
+    .initiative-item       { max-width: 110px; }
+    .initiative-circle     { width: 64px; height: 64px; }
+    .initiative-label      { font-size: 12.5px; }
+    .view-details-btn      { padding: 12px 36px; font-size: 12px; }
+
+    /* Team */
+    .team-section          { padding: 36px 16px; }
+    .team-intro            { grid-template-columns: 1fr; gap: 16px; margin-bottom: 28px; }
+    .team-heading          { font-size: 28px; }
+    .team-grid             { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .team-photo img        { height: 260px; }
+    .team-name             { font-size: 14px; }
+    .team-title            { font-size: 11px; }
+
+    /* Social */
+    .social-section        { padding: 36px 16px; }
+    .social-heading        { font-size: 28px; }
+
+    /* Footer */
+    .footer-inner          { grid-template-columns: 1fr 1fr; gap: 20px; padding: 28px 20px 24px; }
+    .footer-heading        { font-size: 14px; margin-bottom: 14px; }
+    .footer-links li a     { font-size: 13px; }
+    .footer-gallery-img img { height: 80px; }
+    .footer-bottom         { font-size: 12px; padding: 12px; }
+}
+
+/* ----------------------------------------------------------
+   600px — Large mobile / phablet
+   ---------------------------------------------------------- */
+@media (max-width: 600px) {
+    /* Header */
+    .brand-name            { font-size: 14.5px; }
+    .brand-tagline         { font-size: 11.5px; }
+    .lm-logo               { display: none; }
+
+    /* Hero */
+    .hero-heading          { font-size: 28px; }
+
+    /* Parallax */
+    .parallax-heading      { font-size: 26px; }
+    .parallax-subtext      { font-size: 13px; }
+    .carousel-track-outer  { width: 100%; max-width: 88vw; }
+    .carousel-slide img    { width: 140px; height: 220px; }
+
+    /* Testimonial */
+    .quote-text            { font-size: 16px; }
+    .mission-grid          { grid-template-columns: 1fr; }
+    .mission-media-col img,
+    .video-thumb           { height: 210px; }
+
+    /* Eye gallery — single column */
+    .eye-gallery           { grid-template-columns: 1fr 1fr; }
+    .eye-img img           { height: 160px; }
+
+    /* Canteen gallery */
+    .canteen-gallery       { flex-direction: column; }
+    .canteen-gallery img   { width: 100%; height: 180px; flex: unset; }
+
+    /* Initiatives — 2 per row on small screens */
+    .initiatives-icons     { gap: 16px; justify-content: center; }
+    .initiative-item       { max-width: 100px; }
+    .initiatives-heading   { font-size: 22px; }
+
+    /* Team — single column */
+    .team-grid             { grid-template-columns: 1fr; max-width: 340px; margin: 0 auto; }
+    .team-photo img        { height: 300px; }
+
+    /* Footer single col */
+    .footer-inner          { grid-template-columns: 1fr; padding: 24px 16px; gap: 24px; }
+    .footer-gallery        { grid-template-columns: repeat(4, 1fr); }
+    .footer-gallery-img img { height: 70px; }
+}
+
+/* ----------------------------------------------------------
+   480px — Standard mobile
+   ---------------------------------------------------------- */
+@media (max-width: 480px) {
+    /* Header */
+    .header-top            { padding: 8px 12px; min-height: 54px; }
+    .brand-name            { font-size: 13px; }
+    .brand-tagline         { font-size: 11px; }
+
+    /* Nav pills smaller */
+    .nav-pill              { font-size: 12px; padding: 7px 14px; }
+
+    /* Hero */
+    .hero-section          { padding: 18px 12px 16px 12px; }
+    .hero-heading          { font-size: 24px; line-height: 1.15; }
+    .hero-body             { font-size: 13px; }
+    .hero-portrait-bw      { height: 372px; width:400px; }
+    .hero-portrait-color   { height: 374px; width: 400px; }
+
+    /* Parallax */
+    .parallax-section      { padding: 36px 12px; }
+    .parallax-heading      { font-size: 22px; }
+    .parallax-subtext      { font-size: 12.5px; }
+    .carousel-slide img    { width: 200px; height: 297px; }
+    .carousel-btn          { font-size: 34px; padding: 0 4px; }
+
+    /* Testimonial */
+    .testimonial-section   { padding: 22px 12px 20px; }
+    .quote-text            { font-size: 15px; }
+    .quote-marks           { font-size: 50px; }
+    .quote-avatar img      { width: 80px; height: 80px; }
+
+    /* Eye gallery */
+    .eye-screening-block   { margin: 12px; padding: 16px 12px; }
+    .eye-gallery           { grid-template-columns: 1fr 1fr; gap: 6px; }
+    .eye-img img           { height: 140px; }
+    .service-helpline      { font-size: 12.5px; }
+
+    /* Canteen */
+    .canteen-block         { margin: 0 12px 16px; }
+    .canteen-left          { padding: 16px 12px; object-fit: contain; }
+    .canteen-left img      { object-fit: contain; height: 100%; width: 100%s;}
+    .canteen-right         { padding: 16px 12px; }
+
+    /* Initiatives */
+    .initiatives-section   { padding: 32px 12px; }
+    .initiatives-heading   { font-size: 20px; }
+    .initiatives-subtext   { font-size: 12.5px; }
+    .initiatives-icons     { gap: 14px; }
+    .initiative-circle     { width: 58px; height: 58px; }
+    .initiative-item       { max-width: 88px; }
+    .initiative-label      { font-size: 11.5px; }
+    .view-details-btn      { padding: 11px 28px; font-size: 11.5px; }
+
+    /* Team */
+    .team-section          { padding: 28px 12px; }
+    .team-heading          { font-size: 24px; }
+    .team-body             { font-size: 13px; }
+    .team-photo img        { height: 280px; }
+    .team-label            { padding: 12px 12px; }
+    .team-name             { font-size: 13.5px; }
+    .team-title            { font-size: 10.5px; }
+
+    /* Social */
+    .social-section        { padding: 28px 12px; }
+    .social-heading        { font-size: 24px; }
+    .social-btn            { width: 44px; height: 44px; }
+
+    /* Footer */
+    .footer-inner          { padding: 20px 12px; }
+    .footer-heading        { font-size: 13.5px; }
+    .footer-links li a     { font-size: 12.5px; }
+    .footer-bottom         { font-size: 11.5px; padding: 10px; }
+}
+
+/* ----------------------------------------------------------
+   360px — Small / budget mobile
+   ---------------------------------------------------------- */
+@media (max-width: 360px) {
+    /* Header */
+    .brand-name            { font-size: 12px; }
+    .brand-tagline         { display: none; }
+    .header-top            { min-height: 48px; }
+
+    /* Nav */
+    .nav-pill              { font-size: 11px; padding: 6px 10px; }
+    .nav-list              { gap: 4px; }
+
+    /* Hero */
+    .hero-heading          { font-size: 21px; }
+    .hero-portrait-bw      { height: 230px; }
+    .hero-portrait-color   { height: 180px; }
+
+    /* Parallax */
+    .parallax-heading      { font-size: 19px; }
+    .carousel-slide img    { width: 200px; height: 297px; }
+
+    /* Testimonial */
+    .quote-text            { font-size: 14px; }
+
+    /* Eye gallery — full width per image on tiny screens */
+    .eye-gallery           { grid-template-columns: 1fr; }
+    .eye-img img           { height: 200px; }
+
+    /* Canteen gallery */
+    .canteen-gallery       { flex-direction: column; }
+    .canteen-gallery img   { width: 100%; }
+
+    /* Initiatives */
+    .initiatives-heading   { font-size: 18px; }
+    .initiatives-icons     { gap: 12px; }
+    .initiative-circle     { width: 52px; height: 52px; }
+    .initiative-item       { max-width: 78px; }
+    .initiative-label      { font-size: 11px; }
+
+    /* Team */
+    .team-heading          { font-size: 21px; }
+    .team-photo img        { height: 250px; }
+
+    /* Footer */
+    .footer-gallery        { grid-template-columns: 1fr 1fr; }
+    .footer-gallery-img img { height: 60px; }
+}
+
+/* ----------------------------------------------------------
+   Hamburger toggle button — shown on tablet/mobile
+   ---------------------------------------------------------- */
+.nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    margin-left: auto;
+    margin-right: 12px;
+}
+
+.nav-hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: all 0.2s;
+}
+
+@media (max-width: 768px) {
+    .nav-hamburger { display: flex; }
+}
+
+/* ----------------------------------------------------------
+   Prevent background-attachment: fixed on mobile (iOS bug)
+   ---------------------------------------------------------- */
+@media (max-width: 768px) {
+    .parallax-section { background-attachment: scroll; }
+}
+
+/* ============================================================
+
+   ADDITIONS — Animations + Mobile UI improvements
+
+   Append this entire block to the END of home.css
+
+   DO NOT modify anything above this block
+
+   ============================================================ */
+ 
+/* ── 1. NAVBAR FADE-IN ANIMATION on page load ────────────────
+
+   Each .nav-pill fades in with a slight upward slide.
+
+   Uses nth-child stagger so items appear one after another.
+
+   ---------------------------------------------------------- */
+
+@keyframes navFadeIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+ 
+.nav-list .nav-pill {
+    opacity: 0;
+    animation: navFadeIn 0.4s ease forwards;
+}
+ 
+/* Stagger each nav item — 8 items × 0.07s gap */
+
+.nav-list li:nth-child(1) .nav-pill { animation-delay: 0.05s; }
+.nav-list li:nth-child(2) .nav-pill { animation-delay: 0.12s; }
+.nav-list li:nth-child(3) .nav-pill { animation-delay: 0.19s; }
+.nav-list li:nth-child(4) .nav-pill { animation-delay: 0.26s; }
+.nav-list li:nth-child(5) .nav-pill { animation-delay: 0.33s; }
+.nav-list li:nth-child(6) .nav-pill { animation-delay: 0.40s; }
+.nav-list li:nth-child(7) .nav-pill { animation-delay: 0.47s; }
+.nav-list li:nth-child(8) .nav-pill { animation-delay: 0.54s; }
+ 
+/* ── 2. "WHO WE ARE" TEAM BADGE ANIMATION ────────────────────
+
+   .team-label (the red badge overlapping each portrait)
+
+   fades in and slides slightly upward when the card is visible.
+
+   Triggered by .is-visible class added via JS IntersectionObserver.
+
+   ---------------------------------------------------------- */
+
+@keyframes badgeFadeUp {
+
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+ 
+.team-card .team-label {
+    opacity: 0;
+    animation: none;
+}
+ 
+.team-card.is-visible .team-label {
+    animation: badgeFadeUp 0.2s ease 0.10s forwards;
+
+}
+ 
+/* Also animate the photo slightly */
+
+@keyframes photoFadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
+}
+ 
+.team-card .team-photo img {
+
+    opacity: 0;
+    animation: none;
+
+}
+ 
+.team-card.is-visible .team-photo img {
+
+    animation: photoFadeIn 0.45s ease forwards;
+
+}
+ 
+/* ── 3. MOBILE SIDEBAR OVERLAY + COLLAPSIBLE DROPDOWNS ───────
+
+   On mobile (≤768px):
+
+   - Hamburger toggles a full-height sidebar panel (.mobile-sidebar)
+
+   - Sidebar contains nav items with collapsible dropdown sections
+
+   - Overlay dims the page behind the open sidebar
+
+   ---------------------------------------------------------- */
+ 
+/* Overlay behind sidebar */
+
+.mobile-overlay {
+
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.52);
+
+    z-index: 3000;
+
+    opacity: 0;
+
+    transition: opacity 0.25s ease;
+
+}
+ 
+.mobile-overlay.is-open {
+
+    display: block;
+
+    opacity: 1;
+
+}
+ 
+/* Sidebar panel */
+
+.mobile-sidebar {
+
+    position: fixed;
+
+    top: 0;
+
+    left: 0;
+
+    width: 280px;
+
+    height: 100vh;
+
+    background: #1a2b4a;
+
+    z-index: 3100;
+
+    display: flex;
+
+    flex-direction: column;
+
+    transform: translateX(-100%);
+
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+    overflow-y: auto;
+
+}
+ 
+.mobile-sidebar.is-open {
+
+    transform: translateX(0);
+
+}
+ 
+/* Sidebar header row */
+
+.mobile-sidebar-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 16px 18px;
+
+    background: #A30000;
+
+    flex-shrink: 0;
+
+}
+ 
+.mobile-sidebar-brand {
+
+    font-family: 'Poppins', sans-serif;
+
+    font-weight: 700;
+
+    font-size: 14px;
+
+    color: #FFD700;
+
+    line-height: 1.3;
+
+}
+ 
+.mobile-sidebar-close {
+
+    background: none;
+
+    border: none;
+
+    cursor: pointer;
+
+    color: #fff;
+
+    font-size: 22px;
+
+    line-height: 1;
+
+    padding: 2px 6px;
+
+    border-radius: 4px;
+
+    transition: background 0.15s;
+
+}
+ 
+.mobile-sidebar-close:hover {
+
+    background: rgba(255,255,255,0.15);
+
+}
+ 
+/* Nav items inside sidebar */
+
+.mobile-sidebar-nav {
+
+    flex: 1;
+
+    padding: 12px 0 24px;
+
+}
+ 
+.mobile-nav-item {
+
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+
+}
+ 
+/* Top-level link / dropdown trigger */
+
+.mobile-nav-link {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 13px 20px;
+
+    color: rgba(255,255,255,0.88);
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: background 0.15s, color 0.15s;
+
+    background: none;
+
+    border: none;
+
+    width: 100%;
+
+    text-align: left;
+
+}
+ 
+.mobile-nav-link:hover,
+
+.mobile-nav-link.active {
+
+    background: rgba(255,255,255,0.08);
+
+    color: #FFD700;
+
+}
+ 
+/* Dropdown arrow inside sidebar */
+
+.mobile-nav-arrow {
+
+    font-size: 10px;
+
+    transition: transform 0.22s ease;
+
+    display: inline-block;
+
+    color: rgba(255,255,255,0.55);
+
+}
+ 
+.mobile-nav-item.is-open .mobile-nav-arrow {
+
+    transform: rotate(180deg);
+
+    color: #FFD700;
+
+}
+ 
+/* Collapsible dropdown list */
+
+.mobile-dropdown {
+
+    max-height: 0;
+
+    overflow: hidden;
+
+    transition: max-height 0.28s ease;
+
+    background: rgba(0,0,0,0.18);
+
+}
+ 
+.mobile-nav-item.is-open .mobile-dropdown {
+
+    max-height: 300px; /* large enough for any dropdown */
+
+}
+ 
+.mobile-dropdown a {
+
+    display: block;
+
+    padding: 10px 20px 10px 32px;
+
+    font-size: 13px;
+
+    color: rgba(255,255,255,0.70);
+
+    font-family: 'Inter', sans-serif;
+
+    text-decoration: none;
+
+    transition: color 0.15s, background 0.15s;
+
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+
+}
+ 
+.mobile-dropdown a:hover {
+
+    color: #FFD700;
+
+    background: rgba(255,255,255,0.05);
+
+}
+@media (max-width: 768px){
+.mobile-hero-portrait-color {
+    height: 374px;
+    width: 400px;
+}
+}
+/* Hide the original desktop nav on mobile — sidebar replaces it */
+
+@media (max-width: 768px) {
+
+    .header-nav .nav-list {
+
+        display: none !important;
+
+    }
+ 
+    /* Keep hamburger visible — it now opens the sidebar */
+
+    .header-nav {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: flex-end;
+
+        padding: 8px 12px;
+
+        min-height: 44px;
+
+    }
+ 
+    .nav-hamburger {
+
+        display: flex;
+
+        margin: 0;
+
+    }
+
+}
+ 
+/* ── 4. CAROUSEL — 1 image at a time on mobile ───────────────
+
+   JS already sets visibleCount=1 at ≤480px.
+
+   This CSS ensures the track-outer clips correctly and
+
+   each slide is exactly full-width of the visible area.
+
+   ---------------------------------------------------------- */
+
+@media (max-width: 480px) {
+
+    .carousel-track-outer {
+
+        width: 100% !important;
+
+        max-width: 90vw;
+
+        overflow: hidden;
+
+    }
+ 
+    .carousel-track {
+
+        gap: 20px;                    /* no gap — 1 slide visible */
+
+    }
+ 
+    .carousel-slide {
+
+        flex: 0 0 100%;            /* full width = 1 slide */
+
+        min-width: 100%;
+
+    }
+    
+ 
+    .carousel-slide img {
+
+        width: 297px;               /* fill the slide */
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+
+    }
+    .quote-avatar img {
+        height: 200px;
+        width: 200px;
+        margin-left: 80px;
+    }
+    .quote-text {
+        justify-content: center;
+    }
+}
+ 
+/* ── 5. EQUAL IMAGE STYLING — consistent padding + sizing ────
+
+   Applies to: eye gallery, canteen gallery, mission media,
+
+   team photos — all use the same padding wrapper logic.
+
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+ 
+    /* Eye gallery — equal 2-col grid with consistent image height */
+
+    .eye-gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 0 4px;
+    }
+ 
+    .eye-img {
+        padding: 0;                /* reset any extra padding */
+
+    }
+ 
+    .eye-img img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 6px;
+
+    }
+ 
+    /* Canteen gallery — 3 equal images in a row */
+
+    .canteen-gallery {
+
+        display: grid;
+
+        grid-template-columns: repeat(3, 1fr);
+
+        gap: 8px;
+
+        align-items: stretch;
+
+    }
+ 
+    .canteen-gallery img {
+
+        width: 100%;
+
+        height: 130px;
+
+        object-fit: cover;
+
+        border-radius: 6px;
+
+        flex: unset;               /* override inline flex:1 */
+
+    }
+ 
+    /* Mission media — equal heights */
+
+    .mission-media-col img,
+
+    .video-thumb {
+
+        height: 180px;
+
+        width: 100%;
+
+        object-fit: cover;
+
+    }
+    .canteen-left img{
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+    }
+ 
+    /* Team photos — consistent height */
+
+    .team-photo img {
+
+        height: 100%;
+
+        width: 100%;
+
+        object-fit: contain;
+
+        object-position: top;
+
+    }
+
+}
+ 
+@media (max-width: 480px) {
+
+    .eye-img img           { height: 130px; }
+
+    .canteen-gallery img   { height: 110px; }
+
+    .team-photo img        { height: 220px; }
+ 
+    /* Canteen collapses to 1-col at very small screens */
+
+    .canteen-gallery {
+
+        grid-template-columns: 1fr;
+
+    }
+ 
+    .canteen-gallery img   { height: 160px; }
+
+}
+ 
+/* ── 6. "JOIN US" INITIATIVES — 2 icons per row on mobile ────
+
+   Overrides the flex-wrap default to force exactly 2 per row.
+
+   ---------------------------------------------------------- */
+
+@media (max-width: 600px) {
+
+    .initiatives-icons {
+
+        display: grid;
+
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 24px 16px;
+
+        justify-items: center;
+
+        max-width: 320px;
+
+        margin-left: auto;
+
+        margin-right: auto;
+
+    }
+ 
+    .initiative-item {
+
+        max-width: 130px;
+
+        width: 100%;
+
+    }
+
+}
+ 
