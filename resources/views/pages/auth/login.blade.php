@@ -20,7 +20,7 @@
        Namespaced Login (lx-*)
        ========================= */
  
-    html, body { height:100%; }
+    /* html, body { height:100%; }
     body.lx-auth-body{
       height:100%;
       overflow:hidden;
@@ -37,7 +37,7 @@
     @media (max-width: 992px){ .lx-grid{ grid-template-columns: 1fr; } }
  
     /* LEFT: form column */
-    .lx-left{
+    /* .lx-left{
       height:100vh;
       display:flex; flex-direction:column;
       justify-content:center; align-items:center;
@@ -129,10 +129,10 @@
       box-shadow:0 10px 22px rgba(158,54,58,.26);
       transition:var(--transition);
     }
-    .lx-login:hover{ filter:brightness(.98); transform:translateY(-1px); }
+    .lx-login:hover{ filter:brightness(.98); transform:translateY(-1px); } */
  
     /* RIGHT visuals (hidden on mobile) */
-    .lx-right{
+    /* .lx-right{
       position:relative; height:100vh; display:grid; place-items:center;
       background:
         radial-gradient(120% 100% at 10% 10%, rgba(201,75,80,.16) 0%, rgba(7,13,42,0) 55%),
@@ -243,8 +243,454 @@
       left:64px; transform:rotate(-2deg);
       background:linear-gradient(180deg, var(--accent-color), var(--primary-color));
       animation-delay:1.8s;
-    }
- 
+    } 
+  */
+
+/* Base & Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body.lx-auth-body {
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, 'Inter', sans-serif;
+  background: linear-gradient(135deg, #f5f7fc 0%, #eef2f9 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* GRID LAYOUT - Two column modern layout */
+.lx-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1400px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* LEFT PANEL - Form area */
+.lx-left {
+  padding: 3rem 2.5rem;
+  background: white;
+  position: relative;
+  z-index: 2;
+}
+
+/* Brand / Logo */
+.lx-brand {
+  margin-bottom: 2rem;
+}
+
+.lx-brand img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Typography */
+.lx-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a2c3e;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.lx-sub {
+  font-size: 0.95rem;
+  color: #5b6e8c;
+  line-height: 1.5;
+  margin-bottom: 2rem;
+  max-width: 90%;
+}
+
+/* Card-like form container */
+.lx-card {
+  position: relative;
+  background: white;
+}
+
+/* Floating chip / badge */
+.lx-float-chip {
+  display: inline-flex;
+  align-items: center;
+  background: #e2d8d8;
+  padding: 0.4rem 1rem;
+  border-radius: 40px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #8a2c2c;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.3px;
+}
+
+/* Form fields */
+.lx-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.lx-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lx-control {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 1rem;
+  background: #fafcff;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.lx-control:focus {
+  outline: none;
+  border-color: #792929;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: white;
+}
+
+.lx-control::placeholder {
+  color: #a0b3d9;
+  font-size: 0.85rem;
+}
+
+/* Password eye button */
+.lx-eye {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #8ba0bc;
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+}
+
+.lx-eye:hover {
+  color: #612222;
+}
+
+/* Row with checkbox and forgot password */
+.lx-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-check-input {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 0.3rem;
+  border: 1.5px solid #cbd5e1;
+  cursor: pointer;
+}
+
+.form-check-input:checked {
+  background-color: #491c1c;
+  border-color: #a02e2e;
+}
+
+.form-check-label {
+  font-size: 0.85rem;
+  color: #2d3e5f;
+  cursor: pointer;
+}
+
+.lx-row a {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #b33f3f;
+  transition: color 0.2s;
+}
+
+.lx-row a:hover {
+  color: #1e40af;
+  text-decoration: underline !important;
+}
+
+/* Login Button */
+.lx-login {
+  width: 100%;
+  background: linear-gradient(105deg, #5f1e1e 0%, #8a2c2c 100%);
+  border: none;
+  padding: 0.9rem 1.5rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 18px rgba(28, 65, 98, 0.15);
+  margin-top: 1.5rem;
+}
+
+.lx-login:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(105deg, #501414 0%, #722323 100%);
+  box-shadow: 0 12px 24px rgba(28, 65, 98, 0.2);
+}
+
+.lx-login:active {
+  transform: translateY(1px);
+}
+
+/* Alert messages */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+}
+
+/* ========== RIGHT PANEL - VISUAL ACADEMIC DESIGN ========== */
+.lx-right {
+  background: linear-gradient(145deg, #632d2d 0%, #7e2929 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+/* Decorative arcs & rings */
+.lx-arc {
+  position: absolute;
+  top: -20%;
+  right: -15%;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  border: 2px solid rgba(59, 130, 246, 0.15);
+  border-top-color: rgba(59, 130, 246, 0.4);
+  transform: rotate(25deg);
+}
+
+.lx-ring {
+  position: absolute;
+  bottom: -10%;
+  left: -10%;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  border: 2px solid rgba(100, 116, 139, 0.1);
+  border-bottom-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Main hero image container */
+.lx-hero {
+  width: 100%;
+  max-width: 380px;
+  position: relative;
+  z-index: 5;
+}
+
+.lx-hero-frame {
+  background: white;
+  border-radius: 2rem;
+  padding: 0.8rem;
+  box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
+  transform: rotate(2deg);
+  transition: transform 0.3s ease;
+}
+
+.lx-hero-img {
+  border-radius: 1.5rem;
+  overflow: hidden;
+  position: relative;
+  background: #e9d7d7;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lx-hero-img img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+/* Particles effect (simple overlay) */
+.lx-particles {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 40%, rgba(255,255,240,0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
+  pointer-events: none;
+}
+
+/* BOOKS illustration (stacked books) */
+.lx-obj.lx-books {
+  position: absolute;
+  bottom: 12%;
+  left: 8%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 8;
+}
+
+.lx-book {
+  width: 48px;
+  height: 10px;
+  background: #eeb3b3;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transform: skewX(-5deg);
+}
+
+.lx-book:nth-child(2) {
+  width: 56px;
+  background: #e4adaf;
+}
+.lx-book:nth-child(3) {
+  width: 42px;
+  background: #ddabab;
+}
+
+/* CUP with pencils (study theme) */
+.lx-obj.lx-cup {
+  position: absolute;
+  bottom: 15%;
+  right: 10%;
+  width: 65px;
+  height: 65px;
+  background: #fef3c7;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+  z-index: 9;
+}
+
+.lx-cup-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #ffedd5, #fed7aa);
+  border-radius: 0 0 20px 20px;
+}
+
+.lx-pencil {
+  position: absolute;
+  bottom: 100%;
+  width: 8px;
+  height: 28px;
+  background: #fbbf24;
+  border-radius: 2px 2px 0 0;
+  transform-origin: bottom;
+  transform: rotate(6deg);
+}
+
+.lx-pencil::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: #f9a8d4;
+  border-radius: 2px 2px 0 0;
+}
+
+.lx-pencil:nth-child(2) {
+  left: 12px;
+  transform: rotate(-4deg);
+  background: #a5f3fc;
+}
+.lx-pencil:nth-child(3) {
+  left: 28px;
+  transform: rotate(8deg);
+  background: #c4b5fd;
+}
+.lx-pencil:nth-child(4) {
+  left: 45px;
+  transform: rotate(-2deg);
+  background: #fca5a5;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .lx-grid {
+    grid-template-columns: 1fr;
+    max-width: 550px;
+  }
+
+  .lx-right {
+    display: none;
+  }
+
+  .lx-left {
+    padding: 2rem 1.5rem;
+  }
+
+  .lx-title {
+    font-size: 1.75rem;
+  }
+
+  .lx-sub {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  body.lx-auth-body {
+    padding: 1rem;
+  }
+
+  .lx-left {
+    padding: 1.5rem;
+  }
+
+  .lx-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Additional subtle details */
+.lx-control:not(:placeholder-shown) {
+  background: white;
+  border-color: #cbdff2;
+}
+
+.lx-card .form-check-input:focus {
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+}
+
+.lx-eye:focus-visible {
+  outline: 2px solid #3b82f6;
+  border-radius: 30px;
+}
+    
     /* Animations */
     @keyframes lx-pop{ from{opacity:0; transform:translateY(10px) scale(.98);} to{opacity:1; transform:none;} }
     @keyframes lx-zoom{ from{transform:scale(1);} to{transform:scale(1.06);} }
@@ -342,7 +788,7 @@
         <div class="lx-hero-img">
           {{-- Better academic image (library / study hall) --}}
           <img
-            src="{{ asset('/assets/media/images/web/login_hero.png') }}"
+            src="{{ asset('/assets/media/images/web/logo.png') }}"
             alt="Indian boys studying together">
           <div class="lx-particles"></div>
         </div>

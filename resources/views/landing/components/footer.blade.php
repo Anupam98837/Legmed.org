@@ -1,3 +1,203 @@
+<style>
+    /* ============================================================
+   SECTION 7: SOCIAL
+   ============================================================ */
+.social-section {
+    background: #f5f3ef;
+    padding: 48px 40px;
+    text-align: center;
+}
+
+.social-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 12px;
+}
+
+.social-divider {
+    width: 60px;
+    height: 2px;
+    background: #b8a090;
+    margin: 0 auto 28px;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #A30000;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.social-btn:hover {
+    background: #7a0000;
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   MAIN FOOTER
+   ============================================================ */
+.main-footer {
+    background: #A30000;
+    color: #fff;
+}
+
+.footer-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 32px;
+    padding: 48px 64px 40px;
+}
+
+.footer-heading {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #FFD700;
+    margin-bottom: 18px;
+}
+
+.footer-heading-white {
+    color: #fff;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.footer-links li {
+    margin-bottom: 8px;
+}
+
+.footer-links li a {
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.88);
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    transition: color 0.15s;
+}
+
+.footer-links li a:hover {
+    color: #FFD700;
+}
+
+.footer-social {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.footer-social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.15s;
+}
+
+.footer-social a:hover {
+    background: rgba(255,255,255,0.28);
+}
+
+
+.footer-gallery {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.footer-gallery-img img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.footer-bottom {
+    background: #7a0000;
+    text-align: center;
+    padding: 14px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.88);
+    font-family: 'Inter', sans-serif;
+} 
+
+
+/* ============================================================
+   FOOTER RESPONSIVE MEDIA QUERIES
+   ============================================================ */
+ 
+@media (max-width: 1400px) {
+    .footer-inner { padding: 40px 48px 36px; }
+}
+ 
+@media (max-width: 1200px) {
+    .footer-inner { padding: 40px 36px 32px; gap: 24px; }
+}
+ 
+@media (max-width: 1024px) {
+    .footer-inner { 
+        grid-template-columns: 1fr 1fr; 
+        gap: 24px; 
+        padding: 36px 28px 28px; 
+    }
+    .footer-gallery-img img { height: 88px; }
+}
+ 
+@media (max-width: 768px) {
+    .footer-inner { 
+        grid-template-columns: 1fr 1fr; 
+        gap: 20px; 
+        padding: 28px 20px 24px; 
+    }
+    .footer-heading { font-size: 14px; margin-bottom: 14px; }
+    .footer-links li a { font-size: 13px; }
+    .footer-gallery-img img { height: 80px; }
+    .footer-bottom { font-size: 12px; padding: 12px; }
+}
+ 
+@media (max-width: 600px) {
+    .footer-inner { 
+        grid-template-columns: 1fr; 
+        padding: 24px 16px; 
+        gap: 24px; 
+    }
+    .footer-gallery { grid-template-columns: repeat(4, 1fr); }
+    .footer-gallery-img img { height: 70px; }
+}
+ 
+@media (max-width: 480px) {
+    .footer-inner { padding: 20px 12px; }
+    .footer-heading { font-size: 13.5px; }
+    .footer-links li a { font-size: 12.5px; }
+    .footer-bottom { font-size: 11.5px; padding: 10px; }
+}
+ 
+@media (max-width: 360px) {
+    .footer-gallery { grid-template-columns: 1fr 1fr; }
+    .footer-gallery-img img { height: 60px; }
+}
+
+
+</style>
 {{-- Social Section --}}
 <section class="social-section">
     <h2 class="social-heading">Join Us</h2>

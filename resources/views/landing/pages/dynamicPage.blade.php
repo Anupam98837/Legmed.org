@@ -624,7 +624,7 @@ try {
 
         .hallienz-side__row{ display:flex; align-items:stretch; }
 
-        .hallienz-side__link{flex: 1 1 auto;display: flex;align-items: center;gap: 12px;padding: 10px 14px;text-decoration: none;color: #0b5ed7;border-bottom: 1px dotted rgba(0,0,0,.18);transition: background .25s ease, color .25s ease;min-width: 0;}
+        .hallienz-side__link{flex: 1 1 auto;display: flex;align-items: center;gap: 12px;padding: 10px 14px; text-decoration: none;color: #5f6368;border-bottom: 1px dotted rgba(0,0,0,.18);transition: background .25s ease, color .25s ease;min-width: 0;}
         .hallienz-side__link:hover{background: rgba(158, 54, 58, .06);color: var(--primary-color, #9E363A);}
         .hallienz-side__link.active{background: rgba(158, 54, 58, .10);color: var(--primary-color, #9E363A);font-weight: 700;}
         .hallienz-side__text{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}

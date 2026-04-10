@@ -43,7 +43,6 @@
         width:100%;
         position:relative;
         overflow: visible;
-
         max-width: var(--menu-max-w);
         margin: 0 auto;
     }
